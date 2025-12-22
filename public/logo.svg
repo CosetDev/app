@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" zoomAndPan="magnify" viewBox="0 0 384 383.999986" height="512" preserveAspectRatio="xMidYMid meet" version="1.0">
+  <defs>
+    <clipPath id="a51eea3290">
+      <path d="M 4.675781 4.675781 L 379.324219 4.675781 L 379.324219 379.324219 L 4.675781 379.324219 Z M 4.675781 4.675781 " clip-rule="nonzero" />
+    </clipPath>
+    <clipPath id="8fb4597553">
+      <path d="M 192 4.675781 C 88.542969 4.675781 4.675781 88.542969 4.675781 192 C 4.675781 295.457031 88.542969 379.324219 192 379.324219 C 295.457031 379.324219 379.324219 295.457031 379.324219 192 C 379.324219 88.542969 295.457031 4.675781 192 4.675781 Z M 192 4.675781 " clip-rule="nonzero" />
+    </clipPath>
+    <clipPath id="d64ecf8d2a">
+      <path d="M 0.675781 0.675781 L 375.324219 0.675781 L 375.324219 375.324219 L 0.675781 375.324219 Z M 0.675781 0.675781 " clip-rule="nonzero" />
+    </clipPath>
+    <clipPath id="dda7704752">
+      <path d="M 188 0.675781 C 84.542969 0.675781 0.675781 84.542969 0.675781 188 C 0.675781 291.457031 84.542969 375.324219 188 375.324219 C 291.457031 375.324219 375.324219 291.457031 375.324219 188 C 375.324219 84.542969 291.457031 0.675781 188 0.675781 Z M 188 0.675781 " clip-rule="nonzero" />
+    </clipPath>
+    <linearGradient x1="0.0000000606774" gradientTransform="matrix(1.463477, 0, 0, 1.463477, 0.674994, 0.674987)" y1="128" x2="256" gradientUnits="userSpaceOnUse" y2="128" id="4232d903a4">
+      <stop stop-opacity="1" stop-color="rgb(100%, 39.99939%, 39.99939%)" offset="0" />
+      <stop stop-opacity="1" stop-color="rgb(100%, 63.43689%, 9.527588%)" offset="1" />
+    </linearGradient>
+    <clipPath id="0ab9d216e2">
+      <rect x="0" width="376" y="0" height="376" />
+    </clipPath>
+    <clipPath id="a3d9e32fe7">
+      <path d="M 38 83 L 380 83 L 380 381 L 38 381 Z M 38 83 " clip-rule="nonzero" />
+    </clipPath>
+    <clipPath id="db765556e0">
+      <path d="M 454.734375 239.835938 L 147.722656 455.65625 L 37.878906 299.402344 L 344.894531 83.582031 Z M 454.734375 239.835938 " clip-rule="nonzero" />
+    </clipPath>
+    <clipPath id="f7ce7cf6cd">
+      <path d="M 38.398438 299.039062 C 98.226562 384.148438 218.015625 406.242188 301.488281 347.5625 C 384.960938 288.886719 404.722656 168.691406 344.894531 83.582031 Z M 38.398438 299.039062 " clip-rule="nonzero" />
+    </clipPath>
+    <linearGradient x1="-42.87219" gradientTransform="matrix(-0.610367, 0.429064, -0.429064, -0.610367, 416.739707, 156.832403)" y1="128" x2="567.547052" gradientUnits="userSpaceOnUse" y2="128" id="63d334781a">
+      <stop stop-opacity="1" stop-color="rgb(100%, 39.99939%, 39.99939%)" offset="0" />
+      <stop stop-opacity="1" stop-color="rgb(100%, 63.529968%, 9.408569%)" offset="1" />
+    </linearGradient>
+    
+    <!-- Main mask that subtracts the white area -->
+    <mask id="subtraction-mask">
+      <!-- White background shows everything -->
+      <rect x="0" y="0" width="384" height="384" fill="white"/>
+      <!-- Black shape subtracts the white area -->
+      <path d="M 24.101562 388.210938 C 24.101562 293.425781 62.488281 200.742188 129.511719 133.722656 C 196.535156 66.699219 289.214844 28.308594 384 28.308594 L 384 211.917969 C 337.570312 211.917969 292.171875 230.722656 259.34375 263.550781 C 226.511719 296.382812 207.707031 341.78125 207.707031 388.210938 Z" fill="black"/>
+    </mask>
+  </defs>
+  
+  <!-- Apply mask to entire artwork -->
+  <g mask="url(#subtraction-mask)">
+    <!-- Main gradient circle -->
+    <g clip-path="url(#a51eea3290)">
+      <g clip-path="url(#8fb4597553)">
+        <g transform="matrix(1, 0, 0, 1, 4, 4)">
+          <g clip-path="url(#0ab9d216e2)">
+            <g clip-path="url(#d64ecf8d2a)">
+              <g clip-path="url(#dda7704752)">
+                <path fill="url(#4232d903a4)" d="M 0.675781 0.675781 L 0.675781 375.324219 L 375.324219 375.324219 L 375.324219 0.675781 Z M 0.675781 0.675781 " fill-rule="nonzero" />
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+    
+    <!-- Secondary gradient shape -->
+    <g clip-path="url(#a3d9e32fe7)">
+      <g clip-path="url(#db765556e0)">
+        <g clip-path="url(#f7ce7cf6cd)">
+          <path fill="url(#63d334781a)" d="M 525.339844 284.644531 L 269.730469 -78.972656 L -102.847656 182.9375 L 152.757812 546.554688 Z" transform="translate(38, 83)" fill-rule="nonzero" />
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

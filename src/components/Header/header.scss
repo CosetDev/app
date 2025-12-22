@@ -1,0 +1,27 @@
+.network-selection {
+    span[data-state="checked"] {
+        display: none !important;
+    }
+
+    .item {
+        &:not(:last-child) {
+            margin-bottom: 4px;
+        }
+
+        &[aria-checked="true"] {
+            &,
+            .image-container {
+                background-color: var(--primary) !important;
+            }
+
+            color: #000;
+        }
+
+        &:hover {
+            &,
+            .image-container {
+                background-color: var(--border);
+            }
+        }
+    }
+}

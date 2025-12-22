@@ -1,0 +1,26 @@
+#app {
+    display: flex;
+    height: 100dvh;
+    width: 100dvw;
+
+    main {
+        flex: 1;
+        height: 100%;
+        overflow-y: auto;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+    }
+}
+
+button {
+    cursor: pointer;
+
+    &:disabled {
+        cursor: default;
+    }
+}
+
+::selection {
+    background-color: var(--primary);
+    color: #fff;
+}
