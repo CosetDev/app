@@ -13,7 +13,7 @@ let latest: {
 
 const history: (typeof latest)[] = [];
 const CACHE_DURATION = 30 * 1000; // 30 seconds
-const LIST_CACHE_DURATION = 10 * 1000; // 1 hour
+const LIST_CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
 export async function GET() {
     if (latest.ts && Date.now() - latest.ts < CACHE_DURATION) {
