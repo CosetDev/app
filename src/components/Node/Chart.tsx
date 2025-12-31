@@ -58,10 +58,6 @@ export default function NodeHealthAreaChart({ data }: { data: ApiResponse }) {
 
     return (
         <Card>
-            <CardHeader>
-                <CardTitle className="text-foreground text-md">Node Health History</CardTitle>
-            </CardHeader>
-
             <CardContent>
                 <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
                     <LineChart accessibilityLayer data={chartData} margin={{ left: 12, right: 12 }}>

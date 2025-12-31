@@ -4,7 +4,6 @@ import { PrivyProvider } from "@privy-io/react-auth";
 
 // Networks
 import { mantle, mantleSepoliaTestnet } from "viem/chains";
-import { movement, movementTestnet } from "@/lib/networks";
 
 export default function WalletProvider({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
@@ -47,7 +46,7 @@ export default function WalletProvider({ children }: Readonly<{ children: React.
                     noPromptOnMfaRequired: false,
                 },
                 defaultChain: mantleSepoliaTestnet,
-                supportedChains: [mantle, mantleSepoliaTestnet, movement, movementTestnet],
+                supportedChains: [mantle, mantleSepoliaTestnet],
             }}
         >
             {children}

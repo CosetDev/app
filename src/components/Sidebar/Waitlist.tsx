@@ -28,8 +28,7 @@ export function WaitlistButton() {
                         <p className="text-center text-sm text-white">JOIN THE</p>
                         <h2 className="font-figtree text-2xl font-bold text-white">WAITLIST</h2>
                         <p className="text-center text-sm text-white">FOR</p>
-                        <h2 className="font-figtree text-2xl font-bold text-white">$COSET</h2>
-                        <p className="text-center text-sm text-white">AIRDROP</p>
+                        <h2 className="font-figtree text-2xl font-bold text-white">AIRDROP</h2>
                     </div>
                 </div>
             </DialogTrigger>
@@ -44,7 +43,7 @@ export function WaitlistButton() {
                 <div className="grid gap-4">
                     <div className="grid gap-3">
                         <Label htmlFor="email">Email</Label>
-                        <Input id="email" name="email" defaultValue="contact@coset.dev" />
+                        <Input id="email" name="email" placeholder="contact@coset.dev" />
                     </div>
                 </div>
                 <DialogFooter>

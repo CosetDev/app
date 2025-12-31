@@ -3,10 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
-import { User2 } from "lucide-react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { useConnectOrCreateWallet, useWallets } from "@privy-io/react-auth";
+import { Key, LucideLogOut, User2 } from "lucide-react";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 
 import {
     DropdownMenu,
@@ -14,6 +14,7 @@ import {
     DropdownMenuItem,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -25,8 +26,8 @@ import "./header.scss";
 export default function Header() {
     const path = usePathname();
 
-    const { wallets, ready } = useWallets();
-    const { connectOrCreateWallet } = useConnectOrCreateWallet();
+    const { ready, wallets } = useWallets();
+    const { login, user, logout } = usePrivy();
 
     const [network, setNetwork] = useState<number | undefined>();
     const networkData = getNetworkByChainId(
@@ -34,45 +35,38 @@ export default function Header() {
     );
 
     const handleNetworkChange = async (id: number) => {
-        console.log(wallets);
-        if (wallets.length === 0) {
-            setNetwork(undefined);
+        const wallet = wallets[0];
+        if (!wallet) return;
+
+        if (Number(wallet.chainId) === id) {
+            setNetwork(id);
             return;
         }
 
         try {
-            await changeWalletNetwork(id);
-        } catch (error) {
-            console.error("Error switching chain:", error);
-            toast.error("Failed to switch network. Please try again.");
+            await wallet.switchChain(id);
+            setNetwork(id);
+        } catch (err) {
+            toast.error("Failed to switch network");
         }
-
-        setNetwork(id);
     };
-
-    const changeWalletNetwork = async (id: number) => {
-        const wallet = wallets[0];
-        await wallet.switchChain(id);
-    };
-
-    useEffect(() => {
-        if (network && wallets.length > 0 && wallets[0].chainId !== network.toString())
-            changeWalletNetwork(defaultNetworkId);
-    }, [network]);
 
     return (
-        <header className="h-12 border-b border-border flex items-center justify-between px-2">
+        <header className="h-12 min-h-12 border-b border-border flex items-center justify-between px-2">
             <h2 className="text-sm font-semibold font-figtree">{linkToTitle(path)}</h2>
             <div className="flex items-center gap-2">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="text-xs h-8" size="icon">
-                            <Image
-                                src={networkData?.icon || "/networks/mantle.png"}
-                                alt="Network Icon"
-                                width={16}
-                                height={16}
-                            />
+                            <div className="relative p-1">
+                                <TestnetBadge isTestnet={networkData?.testnet} />
+                                <Image
+                                    src={networkData?.icon || "/networks/mantle.png"}
+                                    alt="Network Icon"
+                                    width={16}
+                                    height={16}
+                                />
+                            </div>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="network-selection">
@@ -80,7 +74,7 @@ export default function Header() {
                             value={network?.toString()}
                             onValueChange={value => handleNetworkChange(Number(value))}
                         >
-                            {supportedNetworks.map(net => {
+                            {Object.values(supportedNetworks).map(net => {
                                 return (
                                     <DropdownMenuRadioItem
                                         key={net.id}
@@ -88,7 +82,8 @@ export default function Header() {
                                         className="item flex items-center gap-1.5 pl-2 pr-8"
                                         aria-checked={net.id === networkData?.id}
                                     >
-                                        <div className="image-container p-1 rounded-sm">
+                                        <div className="image-container relative p-1 rounded-sm">
+                                            <TestnetBadge isTestnet={net?.testnet} />
                                             <Image
                                                 src={net.icon}
                                                 alt={net.name}
@@ -103,15 +98,15 @@ export default function Header() {
                         </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                {wallets.length > 0 ? (
+                {user?.wallet ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="outline"
                                 className="text-xs h-8 px-2.5 flex items-center gap-1.5"
                             >
-                                <WalletLogo name={wallets[0].walletClientType} />
-                                {truncateWallet(wallets[0].address)}
+                                <WalletLogo name={user.wallet.walletClientType || ""} />
+                                {truncateWallet(user.wallet.address)}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="end">
@@ -121,16 +116,23 @@ export default function Header() {
                                     My Profile
                                 </Link>
                             </DropdownMenuItem>
-                            {/*<DropdownMenuItem onClick={wallets[0].disconnect}>
+                            <DropdownMenuItem>
+                                <Key size={14} />
+                                <Link href="/profile/api" className="w-full">
+                                    Access Tokens
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={logout}>
                                 <LucideLogOut size={14} color="var(--destructive)" />
                                 <span className="text-destructive">Disconnect</span>
-                            </DropdownMenuItem>*/}
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ) : (
                     <>
                         {ready && (
-                            <Button onClick={connectOrCreateWallet} className="text-xs h-8">
+                            <Button onClick={login} className="text-xs h-8">
                                 Connect wallet
                             </Button>
                         )}
@@ -148,4 +150,16 @@ function WalletLogo({ name }: { name: string }) {
     }
 
     return null;
+}
+
+function TestnetBadge({ isTestnet }: { isTestnet?: boolean }) {
+    if (!isTestnet) return null;
+
+    return (
+        <>
+            <div className="absolute -top-[3px] -right-[3px] text-[6px] border border-primary text-primary rounded-full w-2.5 h-2.5 flex items-center justify-center font-figtree">
+                T
+            </div>
+        </>
+    );
 }

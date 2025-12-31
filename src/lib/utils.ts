@@ -14,14 +14,16 @@ export function linkToTitle(link: string) {
             return "Explore";
         case "/create":
             return "Create Oracle";
-        case "/profile#earnings":
+        case "/profile/earnings":
             return "Earnings";
-        case "/profile#services":
-            return "My Services";
-        case "/profile#usage":
+        case "/profile/services":
+            return "My Oracles";
+        case "/profile/usage":
             return "Usage Stats";
-        case "/profile#settings":
+        case "/profile/settings":
             return "Settings";
+        case "/profile/api":
+            return "API Keys";
         case "/node":
             return "Node Monitor";
         default:
@@ -29,13 +31,16 @@ export function linkToTitle(link: string) {
     }
 }
 
-export function getNetworkByChainId(chainId: number) {
-    for (const network of supportedNetworks) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getNetworkByChainId(chainId: any) {
+    if (chainId?.startsWith?.("eip155:")) chainId = Number(chainId.replace("eip155:", ""));
+    for (const networkKey in supportedNetworks) {
+        const network = supportedNetworks[networkKey];
         if (network.id === chainId) {
             return network;
         }
     }
-    return null;   
+    return null;
 }
 
 // Dates like '1m ago', 'Now', '1d ago'

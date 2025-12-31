@@ -42,28 +42,28 @@ export default function Sidebar() {
             </div>
             <div className="flex flex-col gap-3 pt-5 mt-5 px-2 border-t border-border">
                 <SidebarLink
-                    href="/profile#earnings"
+                    href="/profile/earnings"
                     icon={<Landmark size={14} />}
                     title="Earnings"
-                    active={path === "/profile#earnings"}
+                    active={path === "/profile/earnings"}
                 />
                 <SidebarLink
-                    href="/profile#services"
+                    href="/profile/services"
                     icon={<Table2 size={14} />}
-                    title="My Services"
-                    active={path === "/profile#services"}
+                    title="My Oracles"
+                    active={path === "/profile/services"}
                 />
                 <SidebarLink
-                    href="/profile#usage"
+                    href="/profile/usage"
                     icon={<ChartBarIncreasing size={14} />}
                     title="Usage Stats"
-                    active={path === "/profile#usage"}
+                    active={path === "/profile/usage"}
                 />
                 <SidebarLink
-                    href="/profile#settings"
+                    href="/profile/settings"
                     icon={<Settings size={14} />}
                     title="Settings"
-                    active={path === "/profile#settings"}
+                    active={path === "/profile/settings"}
                 />
             </div>
             <div className="flex flex-col gap-3 pt-5 mt-5 px-2 border-t border-border">

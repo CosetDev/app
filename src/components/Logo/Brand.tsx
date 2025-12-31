@@ -7,5 +7,5 @@ export default function Brand({ size }: { size: number }) {
             <Logo size={size} />
             <h1 className="text-3xl font-bold font-figtree mb-1">coset</h1>
         </Link>
-    )
+    );
 }

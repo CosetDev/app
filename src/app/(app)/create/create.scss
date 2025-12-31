@@ -1,0 +1,29 @@
+#create {
+    .steps-container {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        li {
+            background: var(--background);
+            padding: 0 8px;
+
+            &:first-child {
+                padding-left: 0;
+            }
+            &:last-child {
+                padding-right: 0;
+            }
+        }
+    }
+}

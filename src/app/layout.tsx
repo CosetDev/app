@@ -26,7 +26,8 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
     title: "Coset - APIs meet Oracles",
-    description: "Coset connects custom public APIs to smart contracts via oracles using x402 standard.",
+    description:
+        "Coset connects custom public APIs to smart contracts via oracles using x402 standard.",
 };
 
 export default function RootLayout({
@@ -36,7 +37,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={`${inter.variable} ${figtree.variable} ${manrope.variable} antialiased`}>
+            <body
+                className={`${inter.variable} ${figtree.variable} ${manrope.variable} antialiased`}
+            >
                 {children}
             </body>
         </html>
