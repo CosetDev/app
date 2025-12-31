@@ -35,7 +35,6 @@ export async function GET(
         return NextResponse.json({ message: "Oracle not found" }, { status: 404 });
     }
 
-    const owner = new ethers.Wallet(process.env.OWNER_PRIVATE_KEY!);
     const network = supportedNetworks[networkId as keyof typeof supportedNetworks];
 
     const validAfter = 0;
@@ -43,7 +42,7 @@ export async function GET(
     const nonce = ethers.hexlify(ethers.randomBytes(32));
     const token = IERC20Extended__factory.connect(network.currency.address, network.provider);
 
-    const factory = OracleFactory__factory.connect(owner.address, network.provider);
+    const factory = OracleFactory__factory.connect(process.env.ORACLE_FACTORY_ADDRESS!, network.provider);
 
     const [name, version, verifyingContract, factoryConfig] = await Promise.all([
         token.name(),
