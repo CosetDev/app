@@ -348,8 +348,6 @@ function StatsPanel({
         [],
     );
 
-    const usageConfig = useMemo(() => ({ usage: { label: "Usage", color: "#3b82f6" } }), []);
-
     return (
         <div className="flex w-full">
             <Card className="p-4 flex-1">
