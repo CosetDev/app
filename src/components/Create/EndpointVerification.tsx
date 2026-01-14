@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { StepSection } from "./StepSection";
+import Link from "next/link";
 
 type EndpointVerificationProps = {
     endpoint: string;
@@ -128,8 +129,8 @@ export function EndpointVerification({ endpoint, onBack, onNext, id }: EndpointV
                     </DropdownMenuContent>
                 </DropdownMenu>
                 {!keys.length && !keysLoading ? (
-                    <p className="text-xs text-amber-700">
-                        No API keys found. Create one before verifying.
+                    <p className="text-xs text-destructive">
+                        No API keys found. You can <Link href="/profile/api" className="underline">create one here</Link>.
                     </p>
                 ) : null}
             </div>

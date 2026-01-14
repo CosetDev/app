@@ -8,6 +8,8 @@ import { ChevronDown, ChevronRight, Loader2, RefreshCcw } from "lucide-react";
 
 import { fetchWithWallet } from "@/lib/web3";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type OracleRow = {
     id: string;
@@ -49,6 +51,8 @@ export default function ServicesPage() {
     const [oracles, setOracles] = useState<OracleRow[]>([]);
     const [expanded, setExpanded] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState<string | null>(null);
+    const [drafts, setDrafts] = useState<Record<string, { name: string; description: string }>>({});
 
     const totalCount = useMemo(() => oracles.length, [oracles]);
 
@@ -61,6 +65,16 @@ export default function ServicesPage() {
             if (!response.ok) throw new Error(payload?.message || "Failed to load oracles");
 
             setOracles((payload?.oracles as OracleRow[]) ?? []);
+            setDrafts(prev => {
+                const next = { ...prev };
+                for (const oracle of (payload?.oracles as OracleRow[]) ?? []) {
+                    next[oracle.id] = {
+                        name: prev[oracle.id]?.name ?? oracle.name ?? "",
+                        description: prev[oracle.id]?.description ?? oracle.description ?? "",
+                    };
+                }
+                return next;
+            });
         } catch (error) {
             const message = error instanceof Error ? error.message : "Failed to load oracles";
             toast.error(message);
@@ -81,6 +95,53 @@ export default function ServicesPage() {
         });
     };
 
+    const handleDraftChange = (id: string, field: "name" | "description", value: string) => {
+        setDrafts(prev => ({
+            ...prev,
+            [id]: {
+                name: prev[id]?.name ?? "",
+                description: prev[id]?.description ?? "",
+                [field]: value,
+            },
+        }));
+    };
+
+    const handleReset = (oracle: OracleRow) => {
+        setDrafts(prev => ({
+            ...prev,
+            [oracle.id]: { name: oracle.name ?? "", description: oracle.description ?? "" },
+        }));
+    };
+
+    const handleSave = async (oracle: OracleRow) => {
+        const draft = drafts[oracle.id] ?? { name: oracle.name ?? "", description: oracle.description ?? "" };
+        setSaving(oracle.id);
+        try {
+            const response = await fetchWithWallet(`/api/oracle/${oracle.id}/edit`, {
+                method: "POST",
+                body: JSON.stringify({ name: draft.name, description: draft.description }),
+            });
+            const body = await response.json();
+
+            if (!response.ok) throw new Error(body?.message || "Failed to update oracle");
+
+            setOracles(prev =>
+                prev.map(item =>
+                    item.id === oracle.id
+                        ? { ...item, name: body?.name ?? draft.name, description: body?.description ?? draft.description }
+                        : item,
+                ),
+            );
+
+            toast.success("Oracle updated");
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Failed to update oracle";
+            toast.error(message);
+        } finally {
+            setSaving(null);
+        }
+    };
+
     const handleResume = (oracle: OracleRow) => {
         const status = deriveStatus(oracle);
         if (!status.nextStep) return;
@@ -98,7 +159,7 @@ export default function ServicesPage() {
 
             <Panel
                 title="Your services"
-                description="Expand an oracle to see details or resume verification."
+                description="All of your deployed and in-progress oracles."
                 action={
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                         <RefreshCcw
@@ -158,7 +219,7 @@ export default function ServicesPage() {
                                                 variant="outline"
                                                 onClick={() => handleResume(oracle)}
                                             >
-                                                Resume verification
+                                                Resume Deployment
                                             </Button>
                                         ) : null}
                                         <Button
@@ -177,18 +238,77 @@ export default function ServicesPage() {
                                 </div>
 
                                 {isExpanded && (
-                                    <div className="mt-4 grid gap-3 rounded-md border border-border p-3 text-sm text-gray-700 md:grid-cols-2">
-                                        <DetailRow label="Endpoint" value={endpoint} />
-                                        <DetailRow
-                                            label="Network"
-                                            value={oracle.network || "Not deployed"}
-                                        />
-                                        <DetailRow
-                                            label="Address"
-                                            value={oracle.address || "Not deployed"}
-                                        />
-                                        <DetailRow label="Verification" value={status.label} />
-                                    </div>
+                                    <form
+                                        className="mt-4 space-y-4 rounded-md border border-border p-3 text-sm text-gray-700"
+                                        onSubmit={event => {
+                                            event.preventDefault();
+                                            void handleSave(oracle);
+                                        }}
+                                    >
+                                        <div className="grid gap-3 md:grid-cols-2">
+                                            <div className="space-y-1">
+                                                <Label htmlFor={`${oracle.id}-name`}>Name</Label>
+                                                <Input
+                                                    id={`${oracle.id}-name`}
+                                                    value={drafts[oracle.id]?.name ?? oracle.name ?? ""}
+                                                    maxLength={64}
+                                                    onChange={event =>
+                                                        handleDraftChange(oracle.id, "name", event.target.value)
+                                                    }
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div className="space-y-1 md:col-span-2">
+                                                <Label htmlFor={`${oracle.id}-description`}>Description</Label>
+                                                <textarea
+                                                    id={`${oracle.id}-description`}
+                                                    value={drafts[oracle.id]?.description ?? oracle.description ?? ""}
+                                                    maxLength={1024}
+                                                    onChange={event =>
+                                                        handleDraftChange(oracle.id, "description", event.target.value)
+                                                    }
+                                                    className="min-h-[90px] w-full rounded-md border border-input bg-white px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                                                />
+                                            </div>
+
+                                            <ReadOnlyInput label="Endpoint" value={endpoint} />
+                                            <ReadOnlyInput label="Network" value={oracle.network || "Not deployed"} />
+                                            <ReadOnlyInput label="Address" value={oracle.address || "Not deployed"} />
+                                            <ReadOnlyInput label="Price" value={oracle.requestPrice.toString()} />
+                                            <ReadOnlyInput
+                                                label="Recommended Update Duration"
+                                                value={
+                                                    oracle.recommendedUpdateDuration
+                                                        ? `${oracle.recommendedUpdateDuration} ms`
+                                                        : "Not set"
+                                                }
+                                            />
+                                            <ReadOnlyInput label="Verification" value={status.label} />
+                                            <ReadOnlyInput label="Created" value={formatDate(oracle.createdAt)} />
+                                        </div>
+
+                                        <div className="flex justify-end gap-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleReset(oracle)}
+                                                disabled={saving === oracle.id}
+                                            >
+                                                Reset
+                                            </Button>
+                                            <Button type="submit" size="sm" disabled={saving === oracle.id}>
+                                                {saving === oracle.id ? (
+                                                    <span className="flex items-center gap-2">
+                                                        <Loader2 className="size-4 animate-spin" /> Saving
+                                                    </span>
+                                                ) : (
+                                                    "Save changes"
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </form>
                                 )}
                             </div>
                         );
@@ -230,11 +350,11 @@ function StatusPill({ status }: { status: Status }) {
     );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function ReadOnlyInput({ label, value }: { label: string; value: string }) {
     return (
         <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wide text-gray-500">{label}</p>
-            <p className="break-all text-gray-800">{value}</p>
+            <Label className="text-xs uppercase tracking-wide text-gray-500">{label}</Label>
+            <Input value={value} readOnly disabled className="bg-gray-50" />
         </div>
     );
 }

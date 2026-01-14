@@ -53,12 +53,12 @@ export default function Sidebar() {
                     title="My Oracles"
                     active={path === "/profile/services"}
                 />
-                <SidebarLink
+                {/*<SidebarLink
                     href="/profile/usage"
                     icon={<ChartBarIncreasing size={14} />}
                     title="Usage Stats"
                     active={path === "/profile/usage"}
-                />
+                />*/}
                 <SidebarLink
                     href="/profile/settings"
                     icon={<Settings size={14} />}

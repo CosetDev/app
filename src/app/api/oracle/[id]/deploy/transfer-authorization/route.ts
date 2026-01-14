@@ -1,11 +1,11 @@
-import { ethers } from "ethers";
+import { ethers, Wallet } from "ethers";
 import { NextRequest, NextResponse } from "next/server";
 import { IERC20Extended__factory, OracleFactory__factory } from "@coset-dev/contracts";
 
 import connectDB from "@/db/connect";
 import Oracle from "@/db/models/Oracles";
-import { supportedNetworks } from "@/lib/networks";
 import { getIdTokenFromHeaders, getUser } from "@/lib/auth";
+import { availableTokens, supportedNetworks } from "@/lib/networks";
 
 export async function GET(
     req: NextRequest,
@@ -27,6 +27,11 @@ export async function GET(
         return NextResponse.json({ message: "Network not found" }, { status: 404 });
     }
 
+    const token = searchParams.get("token");
+    if (!token || !availableTokens.find(t => t.value === token)) {
+        return NextResponse.json({ message: "Invalid token" }, { status: 404 });
+    }
+
     await connectDB();
 
     // Check if endpoint is verified
@@ -34,57 +39,71 @@ export async function GET(
     if (!oracle) {
         return NextResponse.json({ message: "Oracle not found" }, { status: 404 });
     }
+    if (!oracle.verifications.api) {
+        return NextResponse.json({ message: "Endpoint not verified" }, { status: 400 });
+    }
 
     const network = supportedNetworks[networkId as keyof typeof supportedNetworks];
+    const ownerWallet = new Wallet(process.env.OWNER_PRIVATE_KEY!);
 
-    const validAfter = 0;
-    const validBefore = Math.floor(Date.now() / 1000) + 3600;
-    const nonce = ethers.hexlify(ethers.randomBytes(32));
-    const token = IERC20Extended__factory.connect(network.currency.address, network.provider);
+    try {
+        const validAfter = 0;
+        const validBefore = Math.floor(Date.now() / 1000) + 3600;
+        const nonce = ethers.hexlify(ethers.randomBytes(32));
+        const token = IERC20Extended__factory.connect(network.currency.address, network.provider);
+        const factory = OracleFactory__factory.connect(
+            process.env.NEXT_PUBLIC_ORACLE_FACTORY_ADDRESS!,
+            network.provider,
+        );
 
-    const factory = OracleFactory__factory.connect(process.env.ORACLE_FACTORY_ADDRESS!, network.provider);
+        const [name, version, verifyingContract, factoryConfig] = await Promise.all([
+            token.name(),
+            token.version(),
+            token.getAddress(),
+            factory.config(),
+        ]);
 
-    const [name, version, verifyingContract, factoryConfig] = await Promise.all([
-        token.name(),
-        token.version(),
-        token.getAddress(),
-        factory.config(),
-    ]);
+        const domain = {
+            name,
+            version,
+            verifyingContract,
+            chainId: network.id,
+        };
 
-    const domain = {
-        name,
-        version,
-        verifyingContract,
-        chainId: network.id,
-    };
+        // EIP-712 Type
+        const types = {
+            TransferWithAuthorization: [
+                { name: "from", type: "address" },
+                { name: "to", type: "address" },
+                { name: "value", type: "uint256" },
+                { name: "validAfter", type: "uint256" },
+                { name: "validBefore", type: "uint256" },
+                { name: "nonce", type: "bytes32" },
+            ],
+        } as const;
 
-    // EIP-712 Type
-    const types = {
-        TransferWithAuthorization: [
-            { name: "from", type: "address" },
-            { name: "to", type: "address" },
-            { name: "value", type: "uint256" },
-            { name: "validAfter", type: "uint256" },
-            { name: "validBefore", type: "uint256" },
-            { name: "nonce", type: "bytes32" },
-        ],
-    } as const;
+        // Message
+        const message = {
+            from: user.wallet,
+            to: ownerWallet.address,
+            value: factoryConfig.oracleDeployPrice.toString(),
+            validAfter,
+            validBefore,
+            nonce,
+        };
 
-    // Message
-    const message = {
-        from: user.wallet,
-        to: process.env.NEXT_PUBLIC_OWNER_ADDRESS,
-        value: factoryConfig.oracleDeployPrice.toString(),
-        validAfter,
-        validBefore,
-        nonce,
-    };
-
-    return NextResponse.json({
-        domain,
-        types,
-        nonce,
-        message,
-        primaryType: "TransferWithAuthorization",
-    });
+        return NextResponse.json({
+            domain,
+            types,
+            nonce,
+            message,
+            primaryType: "TransferWithAuthorization",
+        });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json(
+            { message: "Failed to create transfer authorization" },
+            { status: 500 },
+        );
+    }
 }

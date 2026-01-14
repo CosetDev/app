@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import connectDB from "@/db/connect";
 import Oracle from "@/db/models/Oracles";
 import Payment from "@/db/models/Payments";
-import { getIdTokenFromHeaders, getUser } from "@/lib/auth";
 
 type EarningsPoint = {
     date: string;
@@ -13,18 +12,17 @@ type EarningsPoint = {
     platformFee: number;
 };
 
-export async function GET() {
-    const user = await getUser(await getIdTokenFromHeaders());
-    if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const id = (await params)?.id;
+    if (!id) return NextResponse.json({ message: "Oracle id required" }, { status: 400 });
 
     await connectDB();
 
-    const ownedOracles = await Oracle.find({ owner: user.wallet }, { _id: 1 }).lean();
-    const oracleIds = ownedOracles.map(o => o._id);
+    const oracle = await Oracle.findById(id).lean();
+    if (!oracle) return NextResponse.json({ message: "Oracle not found" }, { status: 404 });
 
-    // Earnings grouped by day
     const earningsByDay = await Payment.aggregate<EarningsPoint>([
-        { $match: { oracle: { $in: oracleIds } } },
+        { $match: { oracle: oracle._id } },
         {
             $group: {
                 _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
@@ -44,9 +42,18 @@ export async function GET() {
                 platformFee: 1,
             },
         },
+        { $sort: { date: 1 } },
     ]);
 
-    const earningsSeries = earningsByDay.sort((a, b) => a.date.localeCompare(b.date));
-
-    return NextResponse.json({ earningsSeries });
+    return NextResponse.json({
+        id: oracle._id.toString(),
+        name: oracle.name,
+        description: oracle.description,
+        requestPrice: oracle.requestPrice,
+        recommendedUpdateDuration: oracle.recommendedUpdateDuration ?? null,
+        network: oracle.network ?? null,
+        owner: oracle.owner,
+        address: oracle.address ?? null,
+        earningsSeries: earningsByDay,
+    });
 }

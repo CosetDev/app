@@ -13,6 +13,8 @@ type Point = {
 };
 
 export default function UsagePage() {
+    return null;
+
     const [series, setSeries] = useState<Point[]>([]);
     const [loading, setLoading] = useState(false);
 

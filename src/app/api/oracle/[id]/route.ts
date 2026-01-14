@@ -28,6 +28,5 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         requestPrice: oracle.requestPrice,
         recommendedUpdateDuration: oracle.recommendedUpdateDuration,
         createdAt: oracle.createdAt,
-        deploymentTx: oracle.deploymentTx ?? null,
     });
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import type { FormEvent } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -94,7 +95,11 @@ export default function Explore() {
                 )}
 
                 {items.map(oracle => (
-                    <article key={oracle.id} className="rounded-lg border bg-white p-4 shadow-sm">
+                    <Link
+                        href={`/oracle/${oracle.id}`}
+                        key={oracle.id}
+                        className="rounded-lg border bg-white p-4 shadow-sm"
+                    >
                         <div className="flex items-start justify-between gap-3">
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -122,7 +127,7 @@ export default function Explore() {
                                 </span>
                             ) : null}
                         </div>
-                    </article>
+                    </Link>
                 ))}
             </div>
 

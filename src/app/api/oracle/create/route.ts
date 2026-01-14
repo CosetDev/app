@@ -43,21 +43,6 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    const existingOracle = await Oracle.findOne({ owner: user.wallet, "api.url": endpoint });
-    if (existingOracle) {
-        return NextResponse.json({
-            id: existingOracle._id.toString(),
-            exists: true,
-            oracle: {
-                name: existingOracle.name,
-                description: existingOracle.description,
-                endpoint: existingOracle.api.url,
-                price: existingOracle.requestPrice,
-                duration: existingOracle.recommendedUpdateDuration,
-            },
-        });
-    }
-
     const oracle = new Oracle({
         name,
         description,

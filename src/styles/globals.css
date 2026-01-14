@@ -59,7 +59,7 @@
     --primary: rgb(255, 113, 24);
     --primary-10: rgba(255, 113, 24, 0.25);
     --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
+    --secondary: oklch(90.365% 0.0001 271.152);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.97 0 0);
     --muted-foreground: oklch(0.556 0 0);

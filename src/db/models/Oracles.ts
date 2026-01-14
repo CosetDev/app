@@ -16,7 +16,6 @@ export interface IOracle {
     network?: string;
     address?: string;
     requestPrice: number;
-    deploymentTx?: string;
     recommendedUpdateDuration?: number;
 }
 
@@ -27,7 +26,7 @@ export interface IOracleDocument extends IOracle, Document {
 
 const OracleSchema = new Schema<IOracleDocument>(
     {
-        name: { type: String, required: true, unique: true },
+        name: { type: String, required: true },
         description: { type: String, required: true },
         verifications: {
             api: { type: Boolean, required: true },
@@ -39,9 +38,8 @@ const OracleSchema = new Schema<IOracleDocument>(
         },
         owner: { type: String, required: true },
         network: { type: String },
-        address: { type: String },
+        address: { type: String, unique: true },
         requestPrice: { type: Number, required: true },
-        deploymentTx: { type: String },
         recommendedUpdateDuration: { type: Number },
         createdAt: { type: Date, default: Date.now },
     },

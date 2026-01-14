@@ -28,16 +28,7 @@ export async function GET(request: NextRequest) {
     const pipeline = [
         { $match: baseMatch },
         {
-            $lookup: {
-                from: "usages",
-                localField: "_id",
-                foreignField: "oracle",
-                as: "usage",
-            },
-        },
-        {
             $addFields: {
-                usageCount: { $ifNull: [{ $arrayElemAt: ["$usage.count", 0] }, 0] },
                 nameMatch: query
                     ? {
                           $cond: [
@@ -52,7 +43,6 @@ export async function GET(request: NextRequest) {
         {
             $sort: {
                 nameMatch: -1 as -1,
-                usageCount: -1 as -1,
                 createdAt: -1 as -1,
             },
         },
@@ -65,7 +55,6 @@ export async function GET(request: NextRequest) {
                 description: 1,
                 requestPrice: 1,
                 recommendedUpdateDuration: 1,
-                usageCount: 1,
                 createdAt: 1,
             },
         },

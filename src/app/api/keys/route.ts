@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         });
     } catch {
         return NextResponse.json(
-            { message: "A key with this name already exists" },
+            { message: "An error occurred while creating the key" },
             { status: 400 },
         );
     }

@@ -109,7 +109,7 @@ export function OracleInfoForm({ data, onChange, onNext, setID, onPrefill }: Ora
             <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                     <Label htmlFor="oracle-duration">
-                        Recommended Update Duration (ms){" "}
+                        Recommended Update Duration (s){" "}
                         <span className="text-gray-500">(optional)</span>
                     </Label>
                     <Input
@@ -120,7 +120,7 @@ export function OracleInfoForm({ data, onChange, onNext, setID, onPrefill }: Ora
                         step="1"
                         value={data.duration}
                         onChange={e => onChange("duration", parseInt(e.target.value))}
-                        placeholder="60000"
+                        placeholder="3600"
                     />
                 </div>
             </div>
