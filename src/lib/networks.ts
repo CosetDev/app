@@ -70,5 +70,5 @@ export const supportedNetworks = Object.fromEntries(
 export type TokenType = "usdc" | "coset";
 export const availableTokens: { value: TokenType; label: string; icon: string }[] = [
     { value: "usdc", label: "USDC", icon: "/coins/usdc.svg" },
-    { value: "coset", label: "COSET", icon: "/logo.svg" },
+    { value: "coset", label: "CST", icon: "/logo.svg" },
 ];

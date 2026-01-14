@@ -1,25 +1,32 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
     BookMarked,
-    ChartBarIncreasing,
     CornerDownRight,
     Database,
     Landmark,
     MoveUpRight,
     Server,
     Settings,
+    ShowerHead,
     Table2,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useWallets } from "@privy-io/react-auth";
 
-import { cn } from "@/lib/utils";
 import Brand from "../Logo/Brand";
 import { WaitlistButton } from "./Waitlist";
+import { defaultNetworkId} from "@/lib/networks";
+import { cn, getNetworkByChainId } from "@/lib/utils";
 
 export default function Sidebar() {
     const path = usePathname();
+    const { wallets } = useWallets();
+
+    const networkData = getNetworkByChainId(
+        Number(wallets[0]?.chainId) || defaultNetworkId,
+    );
 
     return (
         <aside id="sidebar" className="w-60 py-3 px-3 flex flex-col">
@@ -80,6 +87,16 @@ export default function Sidebar() {
                     title="Node Monitor"
                     active={path === "/node"}
                 />
+            </div>
+            <div className="flex flex-col gap-3 pt-5 mt-5 px-2 border-t border-border">
+                {networkData?.testnet && (
+                    <SidebarLink
+                    href="/faucet"
+                    icon={<ShowerHead size={14} />}
+                    title="Faucet"
+                    active={path === "/faucet"}
+                />
+                )}
             </div>
             <div className="flex-1 flex flex-col justify-end">
                 <WaitlistButton />
