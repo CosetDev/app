@@ -11,7 +11,7 @@
         "pm2": "pm2 start npm --name coset -- start"
     },
     "dependencies": {
-        "@coset-dev/contracts": "^1.0.7",
+        "@coset-dev/contracts": "^1.0.8",
         "@privy-io/react-auth": "^3.9.1",
         "@privy-io/server-auth": "^1.32.5",
         "@radix-ui/react-dialog": "^1.1.15",

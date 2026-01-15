@@ -5,11 +5,9 @@ import { OracleFactory__factory } from "@coset-dev/contracts";
 import connectDB from "@/db/connect";
 import Oracle from "@/db/models/Oracles";
 import { getIdTokenFromHeaders, getUser } from "@/lib/auth";
+import { availableTokens, supportedNetworks } from "@/lib/networks";
 
-export async function POST(
-    req: NextRequest,
-    { params }: { params: Promise<{ id: string; network: string }> },
-) {
+export async function POST(req: NextRequest) {
     const user = await getUser(await getIdTokenFromHeaders());
     if (!user) {
         return NextResponse.json({ message: "Connect your wallet to continue" }, { status: 401 });
@@ -43,9 +41,30 @@ export async function POST(
             { status: 400 },
         );
     }
+    const searchParams = req.nextUrl.searchParams;
+    const networkId = searchParams.get("network");
+    if (!networkId) {
+        return NextResponse.json({ message: "Network not found" }, { status: 404 });
+    }
+
+    const tokenParam = searchParams.get("token");
+    if (!tokenParam || !availableTokens.find(t => t.value === tokenParam)) {
+        return NextResponse.json({ message: "Invalid token" }, { status: 404 });
+    }
+
+    const network = supportedNetworks[networkId as keyof typeof supportedNetworks];
+
+    const currency = network.currencies.find(t => t.label === tokenParam);
+    if (!currency) {
+        return NextResponse.json(
+            { message: "Token not supported on this network" },
+            { status: 400 },
+        );
+    }
 
     const iface = OracleFactory__factory.createInterface();
     const message = iface.encodeFunctionData("deployOracle", [
+        currency.address,
         oracle.recommendedUpdateDuration || 0,
         oracle.requestPrice,
         ethers.toUtf8Bytes(JSON.stringify(initialData)),

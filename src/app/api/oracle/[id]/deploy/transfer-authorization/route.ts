@@ -1,4 +1,4 @@
-import { ethers, Wallet } from "ethers";
+import { Wallet } from "ethers";
 import { NextRequest, NextResponse } from "next/server";
 import { IERC20Extended__factory, OracleFactory__factory } from "@coset-dev/contracts";
 
@@ -27,8 +27,8 @@ export async function GET(
         return NextResponse.json({ message: "Network not found" }, { status: 404 });
     }
 
-    const token = searchParams.get("token");
-    if (!token || !availableTokens.find(t => t.value === token)) {
+    const tokenParam = searchParams.get("token");
+    if (!tokenParam || !availableTokens.find(t => t.value === tokenParam)) {
         return NextResponse.json({ message: "Invalid token" }, { status: 404 });
     }
 
@@ -46,11 +46,19 @@ export async function GET(
     const network = supportedNetworks[networkId as keyof typeof supportedNetworks];
     const ownerWallet = new Wallet(process.env.OWNER_PRIVATE_KEY!);
 
+    const currency = network.currencies.find(t => t.label === tokenParam);
+    if (!currency) {
+        return NextResponse.json(
+            { message: "Token not supported on this network" },
+            { status: 400 },
+        );
+    }
+
     try {
         const validAfter = 0;
-        const validBefore = Math.floor(Date.now() / 1000) + 3600;
-        const nonce = ethers.hexlify(ethers.randomBytes(32));
-        const token = IERC20Extended__factory.connect(network.currency.address, network.provider);
+        const validBefore = 1768459964;
+        const nonce = "0x59fab9819441e345a50714c73c2a10a3ca4765cf69b03e2e0e076a5388ac35b4";
+        const token = IERC20Extended__factory.connect(currency.address, network.provider);
         const factory = OracleFactory__factory.connect(
             process.env.NEXT_PUBLIC_ORACLE_FACTORY_ADDRESS!,
             network.provider,
@@ -66,8 +74,8 @@ export async function GET(
         const domain = {
             name,
             version,
-            verifyingContract,
             chainId: network.id,
+            verifyingContract,
         };
 
         // EIP-712 Type

@@ -10,7 +10,7 @@ import {
 } from "@privy-io/react-auth";
 import { toast } from "sonner";
 import Image from "next/image";
-import { formatUnits } from "ethers";
+import { formatUnits, parseEther, Signature } from "ethers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, ChevronDown, ChevronLeft, Loader2 } from "lucide-react";
 
@@ -44,7 +44,7 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
     const [authorizationError, setAuthorizationError] = useState<string | null>(null);
     const [signature, setSignature] = useState<string | null>(null);
     const [signing, setSigning] = useState(false);
-    const [token, setToken] = useState<TokenType>("usdc");
+    const [token, setToken] = useState<TokenType>("USDC");
 
     const selectedTokenLabel = useMemo(
         () => availableTokens.find(option => option.value === token)?.label || "USDC",
@@ -73,10 +73,7 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
             const normalized = {
                 ...payload,
                 primaryType: payload?.primaryType || "TransferWithAuthorization",
-                message: {
-                    ...payload?.message,
-                    value: payload?.message?.value?.toString?.() ?? payload?.message?.value,
-                },
+                message: payload?.message || {},
             } as TransferAuthorizationPayload;
 
             setAuthorization(normalized);
@@ -203,12 +200,6 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
                 return;
             }
 
-            // Signature
-            const normalizedSignature = signature.startsWith("0x") ? signature.slice(2) : signature;
-            const r = `0x${normalizedSignature.slice(0, 64)}`;
-            const s = `0x${normalizedSignature.slice(64, 128)}`;
-            const v = parseInt(normalizedSignature.slice(128, 130), 16);
-
             const signatureResponse = await fetchWithWallet(
                 `/api/oracle/${id}/deploy/signature?network=${network.key}&token=${token}`,
                 {
@@ -216,14 +207,10 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         id,
+                        sig: Signature.from(signature),
                         validAfter: authorization.message.validAfter,
                         validBefore: authorization.message.validBefore,
                         nonce: authorization.message.nonce,
-                        sig: {
-                            v,
-                            r,
-                            s,
-                        },
                     }),
                 },
             );
@@ -239,7 +226,7 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
                 to: factoryAddress,
                 data: signaturePayload.message,
                 chainId: network.id,
-                value: authorization.message.value, // Required deployment amount
+                value: parseEther("0"), // No ETH value needed
             };
 
             const txResult = await sendTransaction(transaction, {
