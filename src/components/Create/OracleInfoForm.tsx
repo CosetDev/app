@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import type { OracleDraft } from "./types";
 import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { usePrivy } from "@privy-io/react-auth";
 
 type OracleInfoFormProps = {
     data: OracleDraft;
@@ -24,6 +25,7 @@ export function OracleInfoForm({ data, onChange, onNext, setID, onPrefill }: Ora
     const [loading, setLoading] = useState(false);
     const searchParams = useSearchParams();
     const oracleId = searchParams.get("oracle");
+    const { login, user } = usePrivy();
     const handleSubmit = async (event: FormEvent) => {
         setLoading(true);
 
@@ -135,13 +137,19 @@ export function OracleInfoForm({ data, onChange, onNext, setID, onPrefill }: Ora
             </div>
 
             <div className="pt-2 flex justify-end">
-                <Button type="submit" className="w-full md:w-auto" disabled={loading}>
-                    {loading ? (
-                        <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                        "Continue to verification"
-                    )}
-                </Button>
+                {user?.wallet ? (
+                    <Button type="submit" className="w-full md:w-auto" disabled={loading}>
+                        {loading ? (
+                            <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                            "Continue to verification"
+                        )}
+                    </Button>
+                ) : (
+                    <Button type="button" onClick={login} className="text-xs h-8">
+                        Connect wallet
+                    </Button>
+                )}
             </div>
         </form>
     );
