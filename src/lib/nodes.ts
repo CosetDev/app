@@ -1,1 +1,1 @@
-export const nodes = ["http://localhost:5000", "http://localhost:6000"];
+export const nodes = ["https://node1.coset.dev"];
