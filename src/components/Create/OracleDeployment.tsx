@@ -10,9 +10,9 @@ import {
 } from "@privy-io/react-auth";
 import { toast } from "sonner";
 import Image from "next/image";
-import { formatUnits, parseEther, Signature } from "ethers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, ChevronDown, ChevronLeft, Loader2 } from "lucide-react";
+import { BrowserProvider, formatUnits, parseEther, Signature } from "ethers";
 
 import { StepSection } from "./StepSection";
 import { fetchWithWallet } from "@/lib/web3";
@@ -26,6 +26,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 type OracleDeploymentProps = {
     onBack: () => void;
@@ -33,6 +34,8 @@ type OracleDeploymentProps = {
 };
 
 export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
+    const router = useRouter();
+
     const { login, ready } = usePrivy();
     const { wallets } = useWallets();
     const { signTypedData } = useSignTypedData();
@@ -89,7 +92,7 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
         } finally {
             setAuthorizationLoading(false);
         }
-    }, [id, ready, token, wallets?.length]);
+    }, [id, ready, token, wallets?.length, wallets?.[0]?.chainId]);
 
     useEffect(() => {
         setAuthorization(null);
@@ -232,11 +235,18 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
             const txResult = await sendTransaction(transaction, {
                 address: wallets[0].address,
             });
-            console.log(txResult);
             const txHash = (txResult as { hash?: string })?.hash;
-            toast.success(txHash ? `Transaction sent: ${txHash}` : "Deployment transaction sent");
 
-            console.log(`/api/oracle/${id}/deploy?network=${network.key}&token=${token}`);
+            if (!txHash) {
+                console.error("Failed to get transaction hash from result", { txResult });
+                throw new Error("Failed to send deployment transaction");
+            }
+
+            // Wait for confirmation
+            const provider = await wallets[0].getEthereumProvider();
+            const ethersProvider = new BrowserProvider(provider);
+            await ethersProvider.waitForTransaction(txHash);
+
             const finalizeResponse = await fetchWithWallet(
                 `/api/oracle/${id}/deploy?network=${network.key}&token=${token}`,
                 {
@@ -251,6 +261,7 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
             }
 
             toast.success("Oracle deployed successfully");
+            router.replace(`/oracle/${finalizePayload.id}`);
         } catch (error) {
             console.error(error);
             const message = error instanceof Error ? error.message : "Failed to deploy oracle";

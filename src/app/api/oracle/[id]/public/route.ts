@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { Coset, Networks, PaymentToken } from "@coset-dev/sdk";
 
 import connectDB from "@/db/connect";
 import Oracle from "@/db/models/Oracles";
@@ -20,6 +21,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
     const oracle = await Oracle.findById(id).lean();
     if (!oracle) return NextResponse.json({ message: "Oracle not found" }, { status: 404 });
+    if (!oracle.address || !oracle.network)
+        return NextResponse.json({ message: "Oracle not deployed" }, { status: 400 });
 
     const earningsByDay = await Payment.aggregate<EarningsPoint>([
         { $match: { oracle: oracle._id } },
@@ -45,6 +48,20 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         { $sort: { date: 1 } },
     ]);
 
+    // Get oracle data
+    const coset = new Coset(
+        oracle.network as Networks,
+        PaymentToken.CST,
+        oracle.address as `0x${string}`,
+        process.env.OWNER_PRIVATE_KEY as `0x${string}`,
+    );
+
+    const oracleData = await coset.read();
+
+    if (!oracleData) {
+        return NextResponse.json({ message: "Failed to fetch oracle data" }, { status: 500 });
+    }
+
     return NextResponse.json({
         id: oracle._id.toString(),
         name: oracle.name,
@@ -55,5 +72,6 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         owner: oracle.owner,
         address: oracle.address ?? null,
         earningsSeries: earningsByDay,
+        oracleData,
     });
 }

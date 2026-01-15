@@ -1,4 +1,4 @@
-import { Wallet } from "ethers";
+import { ethers, Wallet } from "ethers";
 import { NextRequest, NextResponse } from "next/server";
 import { IERC20Extended__factory, OracleFactory__factory } from "@coset-dev/contracts";
 
@@ -56,8 +56,8 @@ export async function GET(
 
     try {
         const validAfter = 0;
-        const validBefore = 1768459964;
-        const nonce = "0x59fab9819441e345a50714c73c2a10a3ca4765cf69b03e2e0e076a5388ac35b4";
+        const validBefore = Math.floor(Date.now() / 1000) + 3600;
+        const nonce = ethers.hexlify(ethers.randomBytes(32));
         const token = IERC20Extended__factory.connect(currency.address, network.provider);
         const factory = OracleFactory__factory.connect(
             process.env.NEXT_PUBLIC_ORACLE_FACTORY_ADDRESS!,

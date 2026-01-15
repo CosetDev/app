@@ -5,6 +5,7 @@ import connectDB from "@/db/connect";
 import Oracle from "@/db/models/Oracles";
 import { getIdTokenFromHeaders, getUser } from "@/lib/auth";
 import { availableTokens, baseNetworks } from "@/lib/networks";
+import { OracleFactory__factory } from "@coset-dev/contracts";
 
 export async function POST(
     request: NextRequest,
@@ -57,21 +58,32 @@ export async function POST(
     }
 
     // Get transaction
-    console.log(txHash);
-    const transaction = await provider.getTransaction(txHash);
+    const transaction = await provider.getTransactionReceipt(txHash);
     console.log(JSON.stringify(transaction, null, 2));
 
-    //const deployedEvents = receipt?.logs
-    //        .map(log => {
-    //            try {
-    //                return factory.interface.parseLog(log);
-    //            } catch {
-    //                return null;
-    //            }
-    //        })
-    //        .filter(log => log !== null && log.name === "OracleDeployed");//
-    //    const oracleAddress = deployedEvents?.[0]!.args[0];
-    const oracleAddress = "0x0";
+    if (transaction?.status === 0 || transaction?.logs?.length === 0) {
+        return NextResponse.json({ message: "Deployment transaction failed" }, { status: 400 });
+    }
+
+    const deployedEvents = transaction?.logs
+        .map(log => {
+            try {
+                return OracleFactory__factory.createInterface().parseLog(log);
+            } catch {
+                return null;
+            }
+        })
+        .filter(log => log !== null && log.name === "OracleDeployed");
+
+    console.log(deployedEvents);
+    if (deployedEvents?.length === 0) {
+        return NextResponse.json(
+            { message: "Invalid transaction has been received" },
+            { status: 400 },
+        );
+    }
+
+    const oracleAddress = deployedEvents?.[0]!.args[0];
 
     // Update oracle record
     oracle.verifications = {
@@ -79,8 +91,9 @@ export async function POST(
         signature: txHash,
     };
     oracle.address = oracleAddress;
+    oracle.network = networkName;
 
-    // await oracle.save();
+    await oracle.save();
 
-    return NextResponse.json({ address: oracleAddress });
+    return NextResponse.json({ id: oracle._id.toString() });
 }

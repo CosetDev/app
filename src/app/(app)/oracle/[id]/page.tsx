@@ -9,7 +9,6 @@ import {
     OracleTabs,
     StatsPanel,
     buildCodeSample,
-    type LanguageKey,
     type OraclePublic,
     type TabKey,
 } from "@/components/Oracle";
@@ -19,7 +18,7 @@ export default function OraclePage() {
     const oracleId = useMemo(() => (params?.id as string) || "", [params]);
 
     const [tab, setTab] = useState<TabKey>("code");
-    const [language, setLanguage] = useState<LanguageKey>("javascript");
+    const [language, setLanguage] = useState<string>("javascript");
     const [oracle, setOracle] = useState<OraclePublic | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -43,6 +42,7 @@ export default function OraclePage() {
                     owner: body.owner,
                     address: body.address ?? null,
                     earningsSeries: body.earningsSeries ?? [],
+                    oracleData: body.oracleData,
                 });
             } catch (error) {
                 const message = error instanceof Error ? error.message : "Failed to load oracle";
@@ -64,7 +64,13 @@ export default function OraclePage() {
             <OracleTabs tab={tab} onTabChange={setTab} />
 
             {tab === "code" ? (
-                <CodePanel language={language} code={codeSample} onLanguageChange={setLanguage} loading={loading} />
+                <CodePanel
+                    oracleData={oracle?.oracleData}
+                    language={language}
+                    code={codeSample}
+                    onLanguageChange={setLanguage}
+                    loading={loading}
+                />
             ) : (
                 <StatsPanel earningsSeries={oracle?.earningsSeries || []} loading={loading} />
             )}

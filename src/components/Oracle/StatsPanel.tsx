@@ -35,7 +35,7 @@ export function StatsPanel({
     );
 
     return (
-        <div className="flex w-full">
+        <div className="flex w-full px-6">
             <Card className="p-4 flex-1">
                 <CardHeader className="p-0 pb-3">
                     <CardTitle className="text-base">Earnings</CardTitle>

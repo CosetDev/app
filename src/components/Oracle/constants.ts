@@ -1,8 +1,6 @@
-import type { LanguageKey } from "./types";
-
-export const languageLabels: Record<LanguageKey, string> = {
+export const languageLabels: Record<string, string> = {
     javascript: "JavaScript",
-    python: "Python",
-    curl: "cURL",
+    // python: "Python",
+    // curl: "cURL",
 };
 

@@ -1,7 +1,5 @@
 export type TabKey = "code" | "stats";
 
-export type LanguageKey = "javascript" | "python" | "curl";
-
 export type EarningsPoint = {
     date: string;
     totalPaid: number;
@@ -20,5 +18,7 @@ export type OraclePublic = {
     owner: string;
     address: string | null;
     earningsSeries: EarningsPoint[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    oracleData: any;
 };
 

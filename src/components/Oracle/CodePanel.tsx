@@ -12,7 +12,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import type { LanguageKey } from "./types";
 import { languageLabels } from "./constants";
 
 export function CodePanel({
@@ -20,11 +19,14 @@ export function CodePanel({
     code,
     onLanguageChange,
     loading,
+    oracleData,
 }: {
-    language: LanguageKey;
+    language: string;
     code: string;
-    onLanguageChange: (value: LanguageKey) => void;
+    onLanguageChange: (value: string) => void;
     loading: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    oracleData: any;
 }) {
     const handleCopy = async () => {
         await navigator.clipboard.writeText(code);
@@ -33,13 +35,36 @@ export function CodePanel({
 
     return (
         <div className="flex flex-col gap-4 lg:flex-row">
-            <div className="hidden w-1/2 lg:block" aria-hidden />
+            <div className="hidden w-1/2 lg:block">
+                <p>
+                    To interact with this oracle, you can use{" "}
+                    <a
+                        href="https://docs.coset.dev/sdk/getting-started"
+                        className="text-primary"
+                        target="_blank"
+                    >
+                        Coset SDK
+                    </a>
+                    . Every public oracle on Coset can be read without permissions or fees. If you
+                    need fresh data, you need to call an update request and pay the update fee.
+                </p>
 
+                <div className="mt-4 flex flex-col gap-2">
+                    <h3 className="font-semibold">Current Data</h3>
+                    <div className="w-full flex rounded-sm border p-4">
+                        <pre>{JSON.stringify(oracleData, null, 2)}</pre>
+                    </div>
+                </div>
+            </div>
             <div className="relative w-full lg:w-1/2">
                 <div className="absolute right-2 top-2 flex flex-row-reverse items-center gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="text-white! rounded-xs text-xs">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-white! rounded-xs text-xs"
+                            >
                                 <div className="flex items-center gap-2">
                                     <Image
                                         src={`/tech/${language.toLowerCase()}.svg`}
@@ -56,7 +81,7 @@ export function CodePanel({
                             className="rounded-xs p-0.5 w-[var(--radix-dropdown-menu-trigger-width)]"
                             align="end"
                         >
-                            {(Object.keys(languageLabels) as LanguageKey[]).map(key => (
+                            {(Object.keys(languageLabels) as string[]).map(key => (
                                 <DropdownMenuItem key={key} onSelect={() => onLanguageChange(key)}>
                                     <Image
                                         src={`/tech/${key.toLowerCase()}.svg`}
@@ -79,8 +104,29 @@ export function CodePanel({
                         {code}
                     </pre>
                 </div>
+                {language === "javascript" && (
+                    <div className="flex flex-col gap-1">
+                        <p className="mt-4 text-sm">Install Coset SDK using:</p>
+                        <pre className="relative rounded-lg bg-gray-900 p-4 text-xs text-gray-100">
+                            <code>npm install @coset-dev/sdk</code>
+                            <Button
+                                className="absolute right-1.5 top-1/2 -translate-y-1/2"
+                                variant="ghost"
+                                size="icon"
+                                onClick={async () => {
+                                    await navigator.clipboard.writeText(
+                                        "npm install @coset-dev/sdk",
+                                    );
+                                    toast.success("Code copied");
+                                }}
+                                disabled={loading}
+                            >
+                                <Copy className="text-white size-4" />
+                            </Button>
+                        </pre>
+                    </div>
+                )}
             </div>
         </div>
     );
 }
-
