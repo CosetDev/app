@@ -44,4 +44,3 @@ export function formatCurrency(value?: number) {
     if (value === undefined || value === null) return "--";
     return `$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 6 })}`;
 }
-

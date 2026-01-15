@@ -35,6 +35,7 @@ const OracleSchema = new Schema<IOracleDocument>(
         api: {
             protocol: { type: String, enum: ["https", "wss"], required: true },
             url: { type: String, required: true },
+            accessToken: { type: String },
         },
         owner: { type: String, required: true },
         network: { type: String },
