@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     let { price, duration } = body;
-    const { name, description, endpoint } = body;
+    const { name, description, endpoint, oracleId } = body;
 
     price = Number(price);
     duration = duration ? Number(duration) : undefined;
@@ -43,25 +43,41 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    const oracle = new Oracle({
-        name,
-        description,
-        requestPrice: price,
-        verifications: {
-            api: false,
-            signature: null,
-        },
-        api: {
-            protocol: "https",
-            url: endpoint,
-        },
-        owner: user.wallet,
-        recommendedUpdateDuration: duration || undefined,
-    });
-    const savedOracle = await oracle.save();
+    let savedOracleId: string = null!;
+    const existOracle = oracleId ? await Oracle.findOne({ _id: oracleId }) : null;
+
+    if (existOracle) {
+        existOracle.name = name;
+        existOracle.description = description;
+        existOracle.api.url = endpoint;
+        existOracle.requestPrice = Number(price);
+        if (duration) {
+            existOracle.recommendedUpdateDuration = Number(duration);
+        } else {
+            existOracle.recommendedUpdateDuration = undefined;
+        }
+        savedOracleId = (await existOracle.save())._id.toString();
+    } else {
+        const oracle = new Oracle({
+            name,
+            description,
+            requestPrice: price,
+            verifications: {
+                api: false,
+                signature: null,
+            },
+            api: {
+                protocol: "https",
+                url: endpoint,
+            },
+            owner: user.wallet,
+            recommendedUpdateDuration: duration || undefined,
+        });
+        savedOracleId = (await oracle.save())._id.toString();
+    }
 
     return NextResponse.json({
-        id: savedOracle._id.toString(),
+        id: savedOracleId,
         oracle: {
             name,
             description,

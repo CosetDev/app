@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { fetchWithWallet } from "@/lib/web3";
@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
 import type { OracleDraft } from "./types";
+import { Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 type OracleInfoFormProps = {
     data: OracleDraft;
@@ -19,17 +21,23 @@ type OracleInfoFormProps = {
 };
 
 export function OracleInfoForm({ data, onChange, onNext, setID, onPrefill }: OracleInfoFormProps) {
+    const [loading, setLoading] = useState(false);
+    const searchParams = useSearchParams();
+    const oracleId = searchParams.get("oracle");
     const handleSubmit = async (event: FormEvent) => {
+        setLoading(true);
+
         event.preventDefault();
 
         const response = await fetchWithWallet("/api/oracle/create", {
             method: "POST",
-            body: JSON.stringify(data),
+            body: JSON.stringify({ ...data, oracleId }),
         });
 
         const body = await response.json();
 
         if (!response.ok) {
+            setLoading(false);
             toast.error(body.message);
             return;
         }
@@ -44,6 +52,7 @@ export function OracleInfoForm({ data, onChange, onNext, setID, onPrefill }: Ora
             });
         }
 
+        setLoading(false);
         setID(body.id);
         onNext();
     };
@@ -126,8 +135,12 @@ export function OracleInfoForm({ data, onChange, onNext, setID, onPrefill }: Ora
             </div>
 
             <div className="pt-2 flex justify-end">
-                <Button type="submit" className="w-full md:w-auto">
-                    Continue to verification
+                <Button type="submit" className="w-full md:w-auto" disabled={loading}>
+                    {loading ? (
+                        <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                        "Continue to verification"
+                    )}
                 </Button>
             </div>
         </form>

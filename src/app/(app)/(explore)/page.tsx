@@ -130,29 +130,31 @@ export default function Explore() {
                 ))}
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-lg border bg-white/70 p-3 text-sm text-gray-700">
-                <div>
-                    Page {page} of {totalPages}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between gap-3 rounded-lg border bg-white/70 p-3 text-sm text-gray-700">
+                    <div>
+                        Page {page} of {totalPages}
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page <= 1 || loading}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            disabled={page >= totalPages || loading}
+                        >
+                            Next
+                        </Button>
+                    </div>
                 </div>
-                <div className="flex gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                        disabled={page <= 1 || loading}
-                    >
-                        Previous
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                        disabled={page >= totalPages || loading}
-                    >
-                        Next
-                    </Button>
-                </div>
-            </div>
+            )}
         </div>
     );
 }

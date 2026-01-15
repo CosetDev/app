@@ -10,6 +10,7 @@ import { fetchWithWallet } from "@/lib/web3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from 'next/link';
 
 type OracleRow = {
     id: string;
@@ -46,7 +47,7 @@ function Panel({ title, description, children, action }: PanelProps) {
     );
 }
 
-export default function ServicesPage() {
+export default function OraclesPage() {
     const router = useRouter();
     const [oracles, setOracles] = useState<OracleRow[]>([]);
     const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -158,7 +159,7 @@ export default function ServicesPage() {
             </div>
 
             <Panel
-                title="Your services"
+                title="Your oracles"
                 description="All of your deployed and in-progress oracles."
                 action={
                     <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -221,7 +222,13 @@ export default function ServicesPage() {
                                             >
                                                 Resume Deployment
                                             </Button>
-                                        ) : null}
+                                        ) : (
+                                            <Link href={`/oracle/${oracle.id}`}>
+                                                <Button size="sm" variant="outline">
+                                                    View Oracle
+                                                </Button>
+                                            </Link>
+                                        )}
                                         <Button
                                             size="sm"
                                             variant="outline"

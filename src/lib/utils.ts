@@ -2,6 +2,7 @@ import { twMerge } from "tailwind-merge";
 import { clsx, type ClassValue } from "clsx";
 
 import { supportedNetworks } from "./networks";
+import { BytesLike, ethers } from 'ethers';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -16,7 +17,7 @@ export function linkToTitle(link: string) {
             return "Create Oracle";
         case "/profile/earnings":
             return "Earnings";
-        case "/profile/services":
+        case "/profile/oracles":
             return "My Oracles";
         case "/profile/api":
             return "API Keys";
@@ -81,3 +82,19 @@ export function truncateWallet(walletAddress: string, prefixLength = 12, suffixL
 
     return truncatedAddress;
 }
+    
+export const toBytes = (str: string | object) => {
+    if (typeof str === "object") {
+        str = JSON.stringify(str);
+    }
+    return ethers.toUtf8Bytes(str);
+};
+
+export const fromBytes = (data: BytesLike) => {
+    const str = ethers.toUtf8String(data);
+    try {
+        return JSON.parse(str);
+    } catch {
+        return str;
+    }
+};

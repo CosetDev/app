@@ -83,7 +83,7 @@ export function EndpointVerification({ endpoint, onBack, onNext, id }: EndpointV
             title="Endpoint verification"
             description="Confirm the oracle endpoint responds as expected before deployment."
             footer={
-                <div className="flex w-full justify-between gap-2">
+                <div className="flex w-full gap-2 justify-between">
                     <Button variant="outline" onClick={onBack} disabled={loading} size="icon">
                         <ChevronLeft size={16} />
                     </Button>
@@ -130,7 +130,11 @@ export function EndpointVerification({ endpoint, onBack, onNext, id }: EndpointV
                 </DropdownMenu>
                 {!keys.length && !keysLoading ? (
                     <p className="text-xs text-destructive">
-                        No API keys found. You can <Link href="/profile/api" className="underline">create one here</Link>.
+                        No API keys found. You can{" "}
+                        <Link href="/profile/api" className="underline">
+                            create one here
+                        </Link>
+                        .
                     </p>
                 ) : null}
             </div>

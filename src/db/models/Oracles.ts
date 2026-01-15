@@ -39,7 +39,7 @@ const OracleSchema = new Schema<IOracleDocument>(
         },
         owner: { type: String, required: true },
         network: { type: String },
-        address: { type: String, unique: true },
+        address: { type: String, unique: true, sparse: true },
         requestPrice: { type: Number, required: true },
         recommendedUpdateDuration: { type: Number },
         createdAt: { type: Date, default: Date.now },

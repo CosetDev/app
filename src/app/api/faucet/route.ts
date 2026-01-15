@@ -9,8 +9,8 @@ import FaucetClaims, { type FaucetToken } from "@/db/models/FaucetClaims";
 const COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 const FAUCET_CONFIG: Record<FaucetToken, { amount: string }> = {
-    USDC: { amount: parseUnits("100", 6).toString() },
-    CST: { amount: parseUnits("100", 6).toString() },
+    USDC: { amount: parseUnits("50", 6).toString() },
+    CST: { amount: parseUnits("20", 6).toString() },
 };
 
 export async function POST(request: NextRequest) {

@@ -263,11 +263,10 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
             toast.success("Oracle deployed successfully");
             router.replace(`/oracle/${finalizePayload.id}`);
         } catch (error) {
+            setLoading(false);
             console.error(error);
             const message = error instanceof Error ? error.message : "Failed to deploy oracle";
             toast.error(message);
-        } finally {
-            setLoading(false);
         }
     };
 

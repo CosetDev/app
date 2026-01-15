@@ -17,9 +17,9 @@ export default function ProfileNavbar() {
                 active={path === "/profile/earnings"}
             />
             <NavbarLink
-                href="/profile/services"
+                href="/profile/oracles"
                 title="My Oracles"
-                active={path === "/profile/services"}
+                active={path === "/profile/oracles"}
             />
         </nav>
     );

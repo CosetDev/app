@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { ethers, parseUnits } from "ethers";
 import { NextRequest, NextResponse } from "next/server";
 import { OracleFactory__factory } from "@coset-dev/contracts";
 
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     const message = iface.encodeFunctionData("deployOracle", [
         currency.address,
         oracle.recommendedUpdateDuration || 0,
-        oracle.requestPrice,
+        parseUnits(oracle.requestPrice.toString(), currency.decimals),
         ethers.toUtf8Bytes(JSON.stringify(initialData)),
         validAfter,
         validBefore,

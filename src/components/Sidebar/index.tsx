@@ -12,21 +12,20 @@ import {
     Table2,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useWallets } from "@privy-io/react-auth";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import Brand from "../Logo/Brand";
 import { WaitlistButton } from "./Waitlist";
-import { defaultNetworkId} from "@/lib/networks";
+import { defaultNetworkId } from "@/lib/networks";
 import { cn, getNetworkByChainId } from "@/lib/utils";
 
 export default function Sidebar() {
     const path = usePathname();
     const { wallets } = useWallets();
-
-    const networkData = getNetworkByChainId(
-        Number(wallets[0]?.chainId) || defaultNetworkId,
-    );
+    const searchParams = useSearchParams();
+    const oracleId = searchParams.get("oracle");
+    const networkData = getNetworkByChainId(Number(wallets[0]?.chainId) || defaultNetworkId);
 
     return (
         <aside id="sidebar" className="w-60 py-3 px-3 flex flex-col">
@@ -45,6 +44,13 @@ export default function Sidebar() {
                     icon={<CornerDownRight size={14} />}
                     title="Create Oracle"
                     active={path === "/create"}
+                    onClick={e => {
+                        if (oracleId) {
+                            e.preventDefault();
+                            // TODO: refactor to use router
+                            window.location.href = '/create'
+                        }
+                    }}
                 />
             </div>
             <div className="flex flex-col gap-3 pt-5 mt-5 px-2 border-t border-border">
@@ -61,10 +67,10 @@ export default function Sidebar() {
                     active={path === "/profile/earnings"}
                 />
                 <SidebarLink
-                    href="/profile/services"
+                    href="/profile/oracles"
                     icon={<Table2 size={14} />}
                     title="My Oracles"
-                    active={path === "/profile/services"}
+                    active={path === "/profile/oracles"}
                 />
             </div>
             <div className="flex flex-col gap-3 pt-5 mt-5 px-2 border-t border-border">
@@ -85,11 +91,11 @@ export default function Sidebar() {
             <div className="flex flex-col gap-3 pt-5 mt-5 px-2 border-t border-border">
                 {networkData?.testnet && (
                     <SidebarLink
-                    href="/faucet"
-                    icon={<ShowerHead size={14} />}
-                    title="Faucet"
-                    active={path === "/faucet"}
-                />
+                        href="/faucet"
+                        icon={<ShowerHead size={14} />}
+                        title="Faucet"
+                        active={path === "/faucet"}
+                    />
                 )}
             </div>
             <div className="flex-1 flex flex-col justify-end">
@@ -105,12 +111,14 @@ function SidebarLink({
     title,
     active,
     external = false,
+    onClick = undefined,
 }: {
     href: string;
     icon: React.ReactNode;
     title: string;
     active: boolean;
     external?: boolean;
+    onClick?: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
 }) {
     return (
         <Link
@@ -118,6 +126,7 @@ function SidebarLink({
             target={external ? "_blank" : "_self"}
             rel={external ? "noopener noreferrer" : undefined}
             className="flex items-center justify-between"
+            onClick={onClick}
         >
             <div className="flex items-center gap-2.5 rounded-lg group">
                 <div

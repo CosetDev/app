@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 
@@ -18,6 +18,8 @@ import "./create.scss";
 
 export default function Create() {
     const { ready } = usePrivy();
+    const router = useRouter();
+    const pathname = usePathname();
     const searchParams = useSearchParams();
     const initialOracleId = useMemo(() => searchParams.get("oracle"), [searchParams]);
     const initialStep = useMemo(() => {
@@ -26,7 +28,7 @@ export default function Create() {
         return isRedirected ? stepParam : 1;
     }, [initialOracleId, searchParams]);
 
-    const [step, setStep] = useState(initialStep);
+    const [step, setStepInternal] = useState(initialStep);
     const [id, setID] = useState<string | null>(initialOracleId);
     const [data, setData] = useState<OracleDraft>({
         name: "",
@@ -35,6 +37,22 @@ export default function Create() {
         price: "",
         duration: "",
     });
+
+    const setStep = useCallback(
+        (newStep: number) => {
+            setStepInternal(newStep);
+            const params = new URLSearchParams(window.location.search);
+            params.set("step", newStep.toString());
+            if (id) {
+                params.set("oracle", id);
+            } else {
+                params.delete("oracle");
+            }
+            const newUrl = `${pathname}?${params.toString()}`;
+            router.replace(newUrl);
+        },
+        [pathname, router, id],
+    );
 
     const handleChange = (field: keyof OracleDraft, value: string | number) => {
         setData(prev => ({ ...prev, [field]: value }));
@@ -65,7 +83,7 @@ export default function Create() {
             const message = error instanceof Error ? error.message : "Failed to preload oracle";
             toast.error(message);
         }
-    }, []);
+    }, [setStep]);
 
     useEffect(() => {
         if (!initialOracleId || !ready) return;

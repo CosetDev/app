@@ -1,11 +1,16 @@
-import { ethers, Wallet } from "ethers";
+import { ethers, Wallet, ZeroAddress } from "ethers";
 import { NextRequest, NextResponse } from "next/server";
-import { IERC20Extended__factory, OracleFactory__factory } from "@coset-dev/contracts";
+import {
+    IERC20Extended__factory,
+    Oracle__factory,
+    OracleFactory__factory,
+} from "@coset-dev/contracts";
 
 import connectDB from "@/db/connect";
 import Oracle from "@/db/models/Oracles";
 import { getIdTokenFromHeaders, getUser } from "@/lib/auth";
 import { availableTokens, supportedNetworks } from "@/lib/networks";
+import { fromBytes } from "@/lib/utils";
 
 export async function GET(
     req: NextRequest,
@@ -90,11 +95,27 @@ export async function GET(
             ],
         } as const;
 
+        let oneUsdcInCst: bigint = BigInt(0);
+        let oracleDeployPrice = factoryConfig.oracleDeployPrice;
+        if (currency.symbol === "CST") {
+            const cstPriceOracleAddress = await factory.cstPriceOracle();
+            if (cstPriceOracleAddress === ZeroAddress) {
+                NextResponse.json(
+                    { message: "CST price oracle is not set in the factory contract" },
+                    { status: 400 },
+                );
+                return;
+            }
+            const cstPriceOracle = Oracle__factory.connect(cstPriceOracleAddress, network.provider);
+            oneUsdcInCst = BigInt(fromBytes(await cstPriceOracle.getDataWithoutCheck()));
+            oracleDeployPrice = (factoryConfig.oracleDeployPrice * oneUsdcInCst) / BigInt(1e6);
+        }
+
         // Message
         const message = {
             from: user.wallet,
             to: ownerWallet.address,
-            value: factoryConfig.oracleDeployPrice.toString(),
+            value: oracleDeployPrice.toString(),
             validAfter,
             validBefore,
             nonce,
