@@ -12,7 +12,7 @@ export async function POST(
     {
         params,
     }: {
-        params: Promise<{ id: string; network: string }>;
+        params: Promise<{ id: string }>;
     },
 ) {
     const user = await getUser(await getIdTokenFromHeaders());

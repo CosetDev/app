@@ -1,20 +1,20 @@
-import { ethers, Wallet, ZeroAddress } from "ethers";
-import { NextRequest, NextResponse } from "next/server";
 import {
     IERC20Extended__factory,
     Oracle__factory,
     OracleFactory__factory,
 } from "@coset-dev/contracts";
+import { ethers, Wallet, ZeroAddress } from "ethers";
+import { NextRequest, NextResponse } from "next/server";
 
 import connectDB from "@/db/connect";
+import { fromBytes } from "@/lib/utils";
 import Oracle from "@/db/models/Oracles";
 import { getIdTokenFromHeaders, getUser } from "@/lib/auth";
 import { availableTokens, supportedNetworks } from "@/lib/networks";
-import { fromBytes } from "@/lib/utils";
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: Promise<{ id: string; network: string }> },
+    { params }: { params: Promise<{ id: string }> },
 ) {
     const user = await getUser(await getIdTokenFromHeaders());
     if (!user) {
