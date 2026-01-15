@@ -14,7 +14,6 @@ type OracleItem = {
     description: string;
     requestPrice: number;
     recommendedUpdateDuration?: number;
-    usageCount: number;
     createdAt: string;
 };
 

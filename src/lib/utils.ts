@@ -18,10 +18,6 @@ export function linkToTitle(link: string) {
             return "Earnings";
         case "/profile/services":
             return "My Oracles";
-        case "/profile/usage":
-            return "Usage Stats";
-        case "/profile/settings":
-            return "Settings";
         case "/profile/api":
             return "API Keys";
         case "/node":

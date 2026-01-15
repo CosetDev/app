@@ -10,13 +10,7 @@ export default function ProfileNavbar() {
 
     return (
         <nav className="flex border-border border-b">
-            <NavbarLink href="/profile" title="Profile" active={path === "/profile"} />
             <NavbarLink href="/profile/api" title="API Keys" active={path === "/profile/api"} />
-            {/*<NavbarLink
-                href="/profile/usage"
-                title="Usage Stats"
-                active={path === "/profile/usage"}
-            />*/}
             <NavbarLink
                 href="/profile/earnings"
                 title="Earnings"

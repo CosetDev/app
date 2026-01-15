@@ -5,7 +5,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Key, LucideLogOut, User2 } from "lucide-react";
+import { Key, LucideLogOut } from "lucide-react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 
 import {
@@ -110,12 +110,6 @@ export default function Header() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="end">
-                            <DropdownMenuItem>
-                                <User2 size={14} />
-                                <Link href="/profile" className="w-full">
-                                    My Profile
-                                </Link>
-                            </DropdownMenuItem>
                             <DropdownMenuItem>
                                 <Key size={14} />
                                 <Link href="/profile/api" className="w-full">

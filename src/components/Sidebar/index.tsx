@@ -7,7 +7,7 @@ import {
     Landmark,
     MoveUpRight,
     Server,
-    Settings,
+    Key,
     ShowerHead,
     Table2,
 } from "lucide-react";
@@ -49,6 +49,12 @@ export default function Sidebar() {
             </div>
             <div className="flex flex-col gap-3 pt-5 mt-5 px-2 border-t border-border">
                 <SidebarLink
+                    href="/profile/api"
+                    icon={<Key size={14} />}
+                    title="API Keys"
+                    active={path === "/profile/api"}
+                />
+                <SidebarLink
                     href="/profile/earnings"
                     icon={<Landmark size={14} />}
                     title="Earnings"
@@ -59,18 +65,6 @@ export default function Sidebar() {
                     icon={<Table2 size={14} />}
                     title="My Oracles"
                     active={path === "/profile/services"}
-                />
-                {/*<SidebarLink
-                    href="/profile/usage"
-                    icon={<ChartBarIncreasing size={14} />}
-                    title="Usage Stats"
-                    active={path === "/profile/usage"}
-                />*/}
-                <SidebarLink
-                    href="/profile/settings"
-                    icon={<Settings size={14} />}
-                    title="Settings"
-                    active={path === "/profile/settings"}
                 />
             </div>
             <div className="flex flex-col gap-3 pt-5 mt-5 px-2 border-t border-border">
