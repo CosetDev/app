@@ -1,26 +1,28 @@
 "use client";
 
 import { toast } from "sonner";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 
-import { fetchWithWallet } from "@/lib/web3";
 import {
     EndpointVerification,
     OracleDeployment,
     OracleInfoForm,
     StepIndicator,
 } from "@/components/Create";
+import { fetchWithWallet } from "@/lib/web3";
 import type { OracleDraft } from "@/components/Create";
 
 import "./create.scss";
 
 export default function Create() {
-    const { ready } = usePrivy();
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+
+    const { ready } = usePrivy();
+
     const initialOracleId = useMemo(() => searchParams.get("oracle"), [searchParams]);
     const initialStep = useMemo(() => {
         const stepParam = Number(searchParams.get("step"));
@@ -58,32 +60,35 @@ export default function Create() {
         setData(prev => ({ ...prev, [field]: value }));
     };
 
-    const preloadOracle = useCallback(async (oracleId: string, stepParam?: number) => {
-        try {
-            const response = await fetchWithWallet(`/api/oracle/${oracleId}`);
-            const body = await response.json();
+    const preloadOracle = useCallback(
+        async (oracleId: string, stepParam?: number) => {
+            try {
+                const response = await fetchWithWallet(`/api/oracle/${oracleId}`);
+                const body = await response.json();
 
-            if (!response.ok) {
-                toast.error(body?.message || "Unable to load oracle data");
-                return;
+                if (!response.ok) {
+                    toast.error(body?.message || "Unable to load oracle data");
+                    return;
+                }
+
+                setData({
+                    name: body.name || "",
+                    description: body.description || "",
+                    endpoint: typeof body.api?.url === "string" ? body.api.url : "",
+                    price: body.requestPrice?.toString() || "",
+                    duration: body.recommendedUpdateDuration?.toString() || "",
+                });
+
+                if (stepParam === 2 || stepParam === 3) {
+                    setStep(stepParam);
+                }
+            } catch (error) {
+                const message = error instanceof Error ? error.message : "Failed to preload oracle";
+                toast.error(message);
             }
-
-            setData({
-                name: body.name || "",
-                description: body.description || "",
-                endpoint: typeof body.api?.url === "string" ? body.api.url : "",
-                price: body.requestPrice?.toString() || "",
-                duration: body.recommendedUpdateDuration?.toString() || "",
-            });
-
-            if (stepParam === 2 || stepParam === 3) {
-                setStep(stepParam);
-            }
-        } catch (error) {
-            const message = error instanceof Error ? error.message : "Failed to preload oracle";
-            toast.error(message);
-        }
-    }, [setStep]);
+        },
+        [setStep],
+    );
 
     useEffect(() => {
         if (!initialOracleId || !ready) return;

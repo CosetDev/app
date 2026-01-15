@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import Wrapper from "@/components/Wrapper";
 
 import "@/styles/main.scss";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
     title: "Dashboard - Coset",
@@ -19,7 +20,9 @@ export default function RootLayout({
     return (
         <div id="app">
             <Wrapper>
-                <Sidebar />
+                <Suspense>
+                    <Sidebar />
+                </Suspense>
                 <div className="p-3 pl-0 w-full">
                     <main>
                         <Header />
