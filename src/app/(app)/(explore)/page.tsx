@@ -117,12 +117,12 @@ export default function Explore() {
                         </div>
 
                         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-gray-600">
-                            <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 font-medium">
-                                {oracle.requestPrice}
+                            <span className="rounded-sm border px-2 py-1 font-medium">
+                                <span className="font-semibold text-gray-700">{oracle.requestPrice}$</span> per update
                             </span>
                             {oracle.recommendedUpdateDuration ? (
-                                <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1">
-                                    {oracle.recommendedUpdateDuration} secs
+                                <span className="rounded-sm border px-2 py-1 font-medium">
+                                    <span className="font-semibold text-gray-700">{oracle.recommendedUpdateDuration}</span>s
                                 </span>
                             ) : null}
                         </div>

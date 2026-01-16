@@ -120,7 +120,7 @@ export function OracleInfoForm({ data, onChange, onNext, setID, onPrefill }: Ora
             <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                     <Label htmlFor="oracle-duration">
-                        Recommended Update Duration (secs){" "}
+                        Recommended Update Duration (s){" "}
                         <span className="text-gray-500">(optional)</span>
                     </Label>
                     <Input

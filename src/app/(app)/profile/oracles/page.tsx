@@ -10,7 +10,7 @@ import { fetchWithWallet } from "@/lib/web3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from 'next/link';
+import Link from "next/link";
 
 type OracleRow = {
     id: string;
@@ -115,7 +115,10 @@ export default function OraclesPage() {
     };
 
     const handleSave = async (oracle: OracleRow) => {
-        const draft = drafts[oracle.id] ?? { name: oracle.name ?? "", description: oracle.description ?? "" };
+        const draft = drafts[oracle.id] ?? {
+            name: oracle.name ?? "",
+            description: oracle.description ?? "",
+        };
         setSaving(oracle.id);
         try {
             const response = await fetchWithWallet(`/api/oracle/${oracle.id}/edit`, {
@@ -129,7 +132,11 @@ export default function OraclesPage() {
             setOracles(prev =>
                 prev.map(item =>
                     item.id === oracle.id
-                        ? { ...item, name: body?.name ?? draft.name, description: body?.description ?? draft.description }
+                        ? {
+                              ...item,
+                              name: body?.name ?? draft.name,
+                              description: body?.description ?? draft.description,
+                          }
                         : item,
                 ),
             );
@@ -203,13 +210,26 @@ export default function OraclesPage() {
                                             {oracle.description}
                                         </p>
                                         <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-                                            <span>Price: {oracle.requestPrice}</span>
+                                            <span>
+                                                Price per Update:{" "}
+                                                <span className="font-semibold">
+                                                    {oracle.requestPrice}$
+                                                </span>
+                                            </span>
                                             {oracle.recommendedUpdateDuration ? (
                                                 <span>
-                                                    Update: {oracle.recommendedUpdateDuration} secs
+                                                    Update:{" "}
+                                                    <span className="font-semibold">
+                                                        {oracle.recommendedUpdateDuration}s
+                                                    </span>
                                                 </span>
                                             ) : null}
-                                            <span>Created: {formatDate(oracle.createdAt)}</span>
+                                            <span>
+                                                Created:
+                                                <span className="font-semibold">
+                                                    {formatDate(oracle.createdAt)}
+                                                </span>
+                                            </span>
                                         </div>
                                     </div>
 
@@ -257,42 +277,73 @@ export default function OraclesPage() {
                                                 <Label htmlFor={`${oracle.id}-name`}>Name</Label>
                                                 <Input
                                                     id={`${oracle.id}-name`}
-                                                    value={drafts[oracle.id]?.name ?? oracle.name ?? ""}
+                                                    value={
+                                                        drafts[oracle.id]?.name ?? oracle.name ?? ""
+                                                    }
                                                     maxLength={64}
                                                     onChange={event =>
-                                                        handleDraftChange(oracle.id, "name", event.target.value)
+                                                        handleDraftChange(
+                                                            oracle.id,
+                                                            "name",
+                                                            event.target.value,
+                                                        )
                                                     }
                                                     required
                                                 />
                                             </div>
 
                                             <div className="space-y-1 md:col-span-2">
-                                                <Label htmlFor={`${oracle.id}-description`}>Description</Label>
+                                                <Label htmlFor={`${oracle.id}-description`}>
+                                                    Description
+                                                </Label>
                                                 <textarea
                                                     id={`${oracle.id}-description`}
-                                                    value={drafts[oracle.id]?.description ?? oracle.description ?? ""}
+                                                    value={
+                                                        drafts[oracle.id]?.description ??
+                                                        oracle.description ??
+                                                        ""
+                                                    }
                                                     maxLength={1024}
                                                     onChange={event =>
-                                                        handleDraftChange(oracle.id, "description", event.target.value)
+                                                        handleDraftChange(
+                                                            oracle.id,
+                                                            "description",
+                                                            event.target.value,
+                                                        )
                                                     }
                                                     className="min-h-[90px] w-full rounded-md border border-input bg-white px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                                                 />
                                             </div>
 
                                             <ReadOnlyInput label="Endpoint" value={endpoint} />
-                                            <ReadOnlyInput label="Network" value={oracle.network || "Not deployed"} />
-                                            <ReadOnlyInput label="Address" value={oracle.address || "Not deployed"} />
-                                            <ReadOnlyInput label="Price" value={oracle.requestPrice.toString()} />
+                                            <ReadOnlyInput
+                                                label="Network"
+                                                value={oracle.network || "Not deployed"}
+                                            />
+                                            <ReadOnlyInput
+                                                label="Address"
+                                                value={oracle.address || "Not deployed"}
+                                            />
+                                            <ReadOnlyInput
+                                                label="Price"
+                                                value={oracle.requestPrice.toString()}
+                                            />
                                             <ReadOnlyInput
                                                 label="Recommended Update Duration"
                                                 value={
                                                     oracle.recommendedUpdateDuration
-                                                        ? `${oracle.recommendedUpdateDuration} secs`
+                                                        ? `${oracle.recommendedUpdateDuration}s`
                                                         : "Not set"
                                                 }
                                             />
-                                            <ReadOnlyInput label="Verification" value={status.label} />
-                                            <ReadOnlyInput label="Created" value={formatDate(oracle.createdAt)} />
+                                            <ReadOnlyInput
+                                                label="Verification"
+                                                value={status.label}
+                                            />
+                                            <ReadOnlyInput
+                                                label="Created"
+                                                value={formatDate(oracle.createdAt)}
+                                            />
                                         </div>
 
                                         <div className="flex justify-end gap-2">
@@ -305,10 +356,15 @@ export default function OraclesPage() {
                                             >
                                                 Reset
                                             </Button>
-                                            <Button type="submit" size="sm" disabled={saving === oracle.id}>
+                                            <Button
+                                                type="submit"
+                                                size="sm"
+                                                disabled={saving === oracle.id}
+                                            >
                                                 {saving === oracle.id ? (
                                                     <span className="flex items-center gap-2">
-                                                        <Loader2 className="size-4 animate-spin" /> Saving
+                                                        <Loader2 className="size-4 animate-spin" />{" "}
+                                                        Saving
                                                     </span>
                                                 ) : (
                                                     "Save changes"

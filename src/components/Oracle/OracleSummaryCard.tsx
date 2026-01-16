@@ -70,7 +70,7 @@ export function OracleSummaryCard({
                         <SummaryTile
                             title="Update interval"
                             loading={loading}
-                            value={`${oracle.recommendedUpdateDuration} secs`}
+                            value={`${oracle.recommendedUpdateDuration} s`}
                         />
                     )}
                     <SummaryTile
