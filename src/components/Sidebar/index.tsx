@@ -16,7 +16,7 @@ import { useWallets } from "@privy-io/react-auth";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import Brand from "../Logo/Brand";
-import { WaitListButton } from "./WaitList";
+import WaitListButton from "./Waitlist";
 import { defaultNetworkId } from "@/lib/networks";
 import { cn, getNetworkByChainId } from "@/lib/utils";
 

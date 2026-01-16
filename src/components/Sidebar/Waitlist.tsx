@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { usePrivy } from "@privy-io/react-auth";
 import { fetchWithWallet } from "@/lib/web3";
 
-export function WaitListButton() {
+export default function WaitListButton() {
     const { user, login } = usePrivy();
     const [email, setEmail] = useState("");
     const closeRef = useRef<HTMLButtonElement>(null);
@@ -50,7 +50,7 @@ export function WaitListButton() {
 
         setEmail("");
         closeRef.current?.click();
-        toast.success("Successfully joined the wait list!");
+        toast.success("Successfully joined the waitlist!");
     };
     return (
         <Dialog>
