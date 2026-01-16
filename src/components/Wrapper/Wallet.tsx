@@ -1,9 +1,42 @@
 "use client";
 
-import { PrivyProvider } from "@privy-io/react-auth";
+import { fetchWithWallet, resetIdentityToken } from "@/lib/web3";
+import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
+import { useEffect, useMemo } from "react";
 
 // Networks
 import { mantle, mantleSepoliaTestnet } from "viem/chains";
+
+let connectedWallet: string | undefined;
+
+function PrivyContent({ children }: { children: React.ReactNode }) {
+    const { authenticated, ready, user } = usePrivy();
+
+    const isFullyAuthenticated = useMemo(() => {
+        return authenticated && ready;
+    }, [authenticated, ready]);
+
+    useEffect(() => {
+        if (!isFullyAuthenticated) return;
+
+        const wallet = user?.wallet?.address;
+
+        if (connectedWallet && connectedWallet != wallet) {
+            resetIdentityToken();
+            connectedWallet = wallet;
+        } else {
+            connectedWallet = wallet;
+        }
+
+        const syncUser = async () => {
+            await fetchWithWallet("/api/register", { method: "POST" });
+        };
+
+        syncUser();
+    }, [isFullyAuthenticated, user]);
+
+    return <>{children}</>;
+}
 
 export default function WalletProvider({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
@@ -49,7 +82,7 @@ export default function WalletProvider({ children }: Readonly<{ children: React.
                 supportedChains: [mantle, mantleSepoliaTestnet],
             }}
         >
-            {children}
+            <PrivyContent>{children}</PrivyContent>
         </PrivyProvider>
     );
 }

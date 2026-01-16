@@ -3,6 +3,11 @@ import { getIdentityToken } from "@privy-io/react-auth";
 let identityToken: string | null = null;
 let identityTokenPromise: Promise<string | null> | null = null;
 
+export function resetIdentityToken() {
+    identityToken = null
+    identityTokenPromise = null
+}
+
 async function resolveIdentityToken() {
     if (identityToken) return identityToken;
     if (!identityTokenPromise) {

@@ -8,7 +8,7 @@ export async function getUser(idToken: string | null) {
     if (!idToken) return null;
     try {
         const user = await privy.getUser({ idToken });
-        return { wallet: user.wallet!.address };
+        return { wallet: user.wallet!.address, id: user.id, email: user.email?.address };
     } catch {
         return null;
     }

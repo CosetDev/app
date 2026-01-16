@@ -1,6 +1,8 @@
 import mongoose, { Schema, type Model, type Document, Types } from "mongoose";
 
 export interface IUser {
+    privyId: string;
+    email: string;
     wallet: string;
 }
 
@@ -11,6 +13,8 @@ export interface IUserDocument extends IUser, Document {
 
 const UserSchema = new Schema<IUserDocument>(
     {
+        privyId: { type: String, required: true, unique: true },
+        email: { type: String, required: false },
         wallet: { type: String, required: true, unique: true },
         createdAt: { type: Date, default: Date.now },
     },
