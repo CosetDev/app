@@ -12,8 +12,46 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Iridescence from "@/components/ui/Iridescence";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
+import { usePrivy } from "@privy-io/react-auth";
+import { fetchWithWallet } from "@/lib/web3";
 
-export function WaitlistButton() {
+export function WaitListButton() {
+    const { user, login } = usePrivy();
+    const [email, setEmail] = useState("");
+    const closeRef = useRef<HTMLButtonElement>(null);
+    const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!email) {
+            toast.error("Please enter an email address");
+            return;
+        }
+        const wallet = user?.wallet?.address || "";
+        if (!wallet) {
+            toast.error("Please connect your wallet");
+            return;
+        }
+
+        const response = await fetchWithWallet("/api/wait-list", {
+            method: "POST",
+            body: JSON.stringify({
+                email,
+                wallet,
+            }),
+        });
+
+        const body = await response.json();
+
+        if (!response.ok) {
+            toast.error(body.message);
+            return;
+        }
+
+        setEmail("");
+        closeRef.current?.click();
+        toast.success("Successfully joined the wait list!");
+    };
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -33,25 +71,44 @@ export function WaitlistButton() {
                 </div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Join Waitlist</DialogTitle>
-                    <DialogDescription>
-                        Stay updated with the latest news and be the first to know about exciting
-                        opportunities.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4">
-                    <div className="grid gap-3">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" name="email" placeholder="contact@coset.dev" />
+                <form onSubmit={submit} className="space-y-6">
+                    <DialogHeader>
+                        <DialogTitle>Join Waitlist</DialogTitle>
+                        <DialogDescription>
+                            Stay updated with the latest news and be the first to know about
+                            exciting opportunities.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4">
+                        <div className="grid gap-3">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                id="email"
+                                name="email"
+                                type="email"
+                                placeholder="contact@coset.dev"
+                                required={true}
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                            />
+                        </div>
                     </div>
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button type="submit">Submit</Button>
-                </DialogFooter>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button ref={closeRef} variant="outline">
+                                Cancel
+                            </Button>
+                        </DialogClose>
+
+                        {user?.wallet ? (
+                            <Button type="submit">Submit</Button>
+                        ) : (
+                            <Button type="button" onClick={login} className="text-xs h-8">
+                                Connect wallet
+                            </Button>
+                        )}
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     );

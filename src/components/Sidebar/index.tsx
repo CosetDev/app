@@ -16,7 +16,7 @@ import { useWallets } from "@privy-io/react-auth";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import Brand from "../Logo/Brand";
-import { WaitlistButton } from "./Waitlist";
+import { WaitListButton } from "./WaitList";
 import { defaultNetworkId } from "@/lib/networks";
 import { cn, getNetworkByChainId } from "@/lib/utils";
 
@@ -99,7 +99,7 @@ export default function Sidebar() {
                 )}
             </div>
             <div className="flex-1 flex flex-col justify-end">
-                <WaitlistButton />
+                <WaitListButton />
             </div>
         </aside>
     );
