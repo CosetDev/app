@@ -206,7 +206,7 @@ export default function OraclesPage() {
                                             <span>Price: {oracle.requestPrice}</span>
                                             {oracle.recommendedUpdateDuration ? (
                                                 <span>
-                                                    Update: {oracle.recommendedUpdateDuration} ms
+                                                    Update: {oracle.recommendedUpdateDuration} secs
                                                 </span>
                                             ) : null}
                                             <span>Created: {formatDate(oracle.createdAt)}</span>
@@ -287,7 +287,7 @@ export default function OraclesPage() {
                                                 label="Recommended Update Duration"
                                                 value={
                                                     oracle.recommendedUpdateDuration
-                                                        ? `${oracle.recommendedUpdateDuration} ms`
+                                                        ? `${oracle.recommendedUpdateDuration} secs`
                                                         : "Not set"
                                                 }
                                             />

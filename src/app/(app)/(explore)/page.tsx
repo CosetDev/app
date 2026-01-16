@@ -122,7 +122,7 @@ export default function Explore() {
                             </span>
                             {oracle.recommendedUpdateDuration ? (
                                 <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1">
-                                    {oracle.recommendedUpdateDuration} ms
+                                    {oracle.recommendedUpdateDuration} secs
                                 </span>
                             ) : null}
                         </div>

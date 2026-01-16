@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
                 message: "Only HTTPS is allowed",
             })
             .max(256),
-        duration: z.number().min(0).max(31536000000).optional(), // 1 year in ms
+        duration: z.number().min(0).max(31536000000).optional(), // 1 year in secs
     });
 
     const result = schema.safeParse({ name, price, description, endpoint, duration });
