@@ -47,6 +47,7 @@ export default function Header() {
             await wallet.switchChain(id);
             setNetwork(id);
         } catch (err) {
+            console.error(err);
             toast.error("Failed to switch network");
         }
     };

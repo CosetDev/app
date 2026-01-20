@@ -12,7 +12,7 @@
     },
     "dependencies": {
         "@coset-dev/contracts": "^1.0.11",
-        "@coset-dev/sdk": "^1.0.7",
+        "@coset-dev/sdk": "^1.0.12",
         "@privy-io/react-auth": "^3.9.1",
         "@privy-io/server-auth": "^1.32.5",
         "@radix-ui/react-dialog": "^1.1.15",

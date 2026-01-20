@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import connectDB from "@/db/connect";
 import Oracle from "@/db/models/Oracles";
+import { baseNetworks } from "@/lib/networks";
 import { getIdTokenFromHeaders, getUser } from "@/lib/auth";
-import { availableTokens, baseNetworks } from "@/lib/networks";
 import { OracleFactory__factory } from "@coset-dev/contracts";
 
 export async function POST(
@@ -34,7 +34,7 @@ export async function POST(
     if (!networkName || !network) {
         return NextResponse.json({ message: "Invalid network" }, { status: 404 });
     }
-    if (!token || !availableTokens.find(t => t.value === token)) {
+    if (!token || !network.currencies.find(t => t.label === token)) {
         return NextResponse.json({ message: "Invalid token" }, { status: 404 });
     }
 

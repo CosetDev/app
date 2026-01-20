@@ -14,19 +14,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, ChevronDown, ChevronLeft, Loader2 } from "lucide-react";
 import { BrowserProvider, formatUnits, parseEther, Signature } from "ethers";
 
-import { StepSection } from "./StepSection";
-import { fetchWithWallet } from "@/lib/web3";
-import { Button } from "@/components/ui/button";
-import { getNetworkByChainId } from "@/lib/utils";
-import type { TransferAuthorizationPayload } from "./types";
-import { availableTokens, type TokenType } from "@/lib/networks";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { StepSection } from "./StepSection";
 import { useRouter } from "next/navigation";
+import { fetchWithWallet } from "@/lib/web3";
+import type { Currency } from "@/lib/networks";
+import { useNetwork } from "@/hooks/useNetwork";
+import { Button } from "@/components/ui/button";
+import { getNetworkByChainId } from "@/lib/utils";
+import type { TransferAuthorizationPayload } from "./types";
 
 type OracleDeploymentProps = {
     onBack: () => void;
@@ -36,8 +37,9 @@ type OracleDeploymentProps = {
 export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
     const router = useRouter();
 
-    const { login, ready } = usePrivy();
+    const { network } = useNetwork();
     const { wallets } = useWallets();
+    const { login, ready } = usePrivy();
     const { signTypedData } = useSignTypedData();
     const { sendTransaction } = useSendTransaction();
 
@@ -47,28 +49,22 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
     const [authorizationError, setAuthorizationError] = useState<string | null>(null);
     const [signature, setSignature] = useState<string | null>(null);
     const [signing, setSigning] = useState(false);
-    const [token, setToken] = useState<TokenType>("USDC");
 
-    const selectedTokenLabel = useMemo(
-        () => availableTokens.find(option => option.value === token)?.label || "USDC",
-        [token],
+    const availableTokens: Currency[] = useMemo(
+        () => network?.currencies || [],
+        [network?.currencies],
     );
+    const [token, setToken] = useState<Currency | null>(availableTokens?.[0] || null);
 
     const loadAuthorization = useCallback(async () => {
-        if (!ready || !wallets?.length) return null;
-
-        const network = getNetworkByChainId(wallets[0]?.chainId);
-        if (!network) {
-            toast.error("Unsupported network for authorization");
-            return null;
-        }
+        if (!ready || !wallets?.length || !token || !network) return null;
 
         setAuthorizationLoading(true);
         setAuthorizationError(null);
 
         try {
             const response = await fetchWithWallet(
-                `/api/oracle/${id}/deploy/transfer-authorization?network=${network.key}&token=${token}`,
+                `/api/oracle/${id}/deploy/transfer-authorization?network=${network.key}&token=${token.label}`,
             );
             const payload = await response.json();
             if (!response.ok) throw new Error(payload?.message || "Failed to load data");
@@ -147,7 +143,7 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
     );
 
     const handleSignTransfer = async () => {
-        if (!wallets?.length) {
+        if (!wallets?.length || !token) {
             toast.error("Connect your wallet to sign the authorization");
             if (login) login();
             return;
@@ -162,7 +158,7 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
         try {
             const signatureResult = await signAuthorization(authorization, wallets[0]);
             setSignature(signatureResult);
-            toast.success(`${selectedTokenLabel} transfer authorization signed`);
+            toast.success(`${token.label} transfer authorization signed`);
         } catch (error) {
             const message = error instanceof Error ? error.message : "Failed to sign authorization";
             toast.error(message);
@@ -197,14 +193,15 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
                 return;
             }
 
-            const factoryAddress = process.env.NEXT_PUBLIC_ORACLE_FACTORY_ADDRESS;
-            if (!factoryAddress) {
-                toast.error("Oracle factory address is not configured");
+            if (!token) {
+                toast.error("Select a token for deployment");
                 return;
             }
 
+            const factoryAddress = network.factory;
+
             const signatureResponse = await fetchWithWallet(
-                `/api/oracle/${id}/deploy/signature?network=${network.key}&token=${token}`,
+                `/api/oracle/${id}/deploy/signature?network=${network.key}&token=${token.label}`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -248,7 +245,7 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
             await ethersProvider.waitForTransaction(txHash);
 
             const finalizeResponse = await fetchWithWallet(
-                `/api/oracle/${id}/deploy?network=${network.key}&token=${token}`,
+                `/api/oracle/${id}/deploy?network=${network.key}&token=${token.label}`,
                 {
                     method: "POST",
                     body: JSON.stringify({ tx: txHash }),
@@ -307,19 +304,20 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="w-full justify-between">
-                            <div className="flex items-center gap-2">
-                                <Image
-                                    src={
-                                        availableTokens.find(option => option.value === token)
-                                            ?.icon || ""
-                                    }
-                                    alt={selectedTokenLabel}
-                                    width={16}
-                                    height={16}
-                                />
-                                <span className="font-semibold">{selectedTokenLabel}</span>
-                            </div>
-                            <ChevronDown size={16} />
+                            {token && (
+                                <>
+                                    <div className="flex items-center gap-2">
+                                        <Image
+                                            src={token.icon}
+                                            alt={token.label}
+                                            width={16}
+                                            height={16}
+                                        />
+                                        <span className="font-semibold">{token.label}</span>
+                                    </div>
+                                    <ChevronDown size={16} />
+                                </>
+                            )}
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
@@ -328,10 +326,10 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
                     >
                         {availableTokens.map(option => (
                             <DropdownMenuItem
-                                key={option.value}
+                                key={network!.id + option.label}
                                 onSelect={event => {
                                     event.preventDefault();
-                                    setToken(option.value);
+                                    setToken(option);
                                 }}
                             >
                                 <div className="flex items-center gap-2">
@@ -343,7 +341,7 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
                                     />
                                     {option.label}
                                 </div>
-                                {token === option.value ? (
+                                {token?.name === option.name ? (
                                     <Check className="ml-auto size-4 text-primary" />
                                 ) : null}
                             </DropdownMenuItem>
@@ -376,7 +374,7 @@ export function OracleDeployment({ onBack, id }: OracleDeploymentProps) {
                             {authorizationLoading
                                 ? "--"
                                 : formattedAuthorizationValue
-                                  ? `${formattedAuthorizationValue} ${selectedTokenLabel}`
+                                  ? `${formattedAuthorizationValue} ${token?.symbol}`
                                   : "--"}
                         </dd>
                         <dd>{expiresAt || "--"}</dd>

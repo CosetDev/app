@@ -4,8 +4,8 @@ import { OracleFactory__factory } from "@coset-dev/contracts";
 
 import connectDB from "@/db/connect";
 import Oracle from "@/db/models/Oracles";
+import { supportedNetworks } from "@/lib/networks";
 import { getIdTokenFromHeaders, getUser } from "@/lib/auth";
-import { availableTokens, supportedNetworks } from "@/lib/networks";
 
 export async function POST(req: NextRequest) {
     const user = await getUser(await getIdTokenFromHeaders());
@@ -47,12 +47,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: "Network not found" }, { status: 404 });
     }
 
+    const network = supportedNetworks[networkId as keyof typeof supportedNetworks];
+
     const tokenParam = searchParams.get("token");
-    if (!tokenParam || !availableTokens.find(t => t.value === tokenParam)) {
+    if (!tokenParam || !network.currencies.find(t => t.label === tokenParam)) {
         return NextResponse.json({ message: "Invalid token" }, { status: 404 });
     }
-
-    const network = supportedNetworks[networkId as keyof typeof supportedNetworks];
 
     const currency = network.currencies.find(t => t.label === tokenParam);
     if (!currency) {

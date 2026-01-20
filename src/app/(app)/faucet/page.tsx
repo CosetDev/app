@@ -6,7 +6,6 @@ import { useMemo, useState, useTransition } from "react";
 import { Check, ChevronDown, Loader2 } from "lucide-react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 
-import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,12 +13,13 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { fetchWithWallet } from "@/lib/web3";
-import { getNetworkByChainId } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useNetwork } from "@/hooks/useNetwork";
 
 export default function Faucet() {
     const { user, ready, login } = usePrivy();
     const { wallets } = useWallets();
-    const network = getNetworkByChainId(wallets[0]?.chainId);
+    const { network } = useNetwork();
 
     const walletAddress = useMemo(() => user?.wallet?.address ?? "", [user?.wallet?.address]);
     const [token, setToken] = useState<FaucetToken>("USDC");

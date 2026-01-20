@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import connectDB from "@/db/connect";
 import Oracle from "@/db/models/Oracles";
-import Payment from "@/db/models/Payments";
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -12,8 +11,6 @@ export async function GET(request: NextRequest) {
     const network = (searchParams.get("network") || "").trim();
 
     await connectDB();
-
-    const paymentsCollection = Payment.collection.name;
 
     const baseMatch: Record<string, unknown> = {
         "verifications.api": true,
@@ -36,35 +33,7 @@ export async function GET(request: NextRequest) {
     const pipeline = [
         { $match: baseMatch },
         {
-            $addFields: {
-                nameMatch: query
-                    ? {
-                          $cond: [
-                              { $regexMatch: { input: "$name", regex: query, options: "i" } },
-                              1,
-                              0,
-                          ],
-                      }
-                    : 0,
-            },
-        },
-        {
-            $lookup: {
-                from: paymentsCollection,
-                localField: "_id",
-                foreignField: "oracle",
-                as: "payments",
-            },
-        },
-        {
-            $addFields: {
-                totalEarnings: { $sum: "$payments.providerEarning" },
-            },
-        },
-        {
             $sort: {
-                nameMatch: -1 as -1,
-                totalEarnings: -1 as -1,
                 createdAt: -1 as -1,
             },
         },
@@ -79,7 +48,6 @@ export async function GET(request: NextRequest) {
                 network: 1,
                 recommendedUpdateDuration: 1,
                 createdAt: 1,
-                totalEarnings: 1,
             },
         },
     ];
@@ -88,3 +56,4 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ items, total, page, pageSize });
 }
+

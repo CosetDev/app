@@ -100,7 +100,7 @@ export default function Create() {
     return (
         <div
             id="create"
-            className="mx-auto max-w-4xl space-y-6 p-6 md:p-10 flex flex-col justify-center h-full"
+            className="mx-auto max-w-4xl space-y-6 p-6 md:p-10 flex flex-col h-full"
         >
             <div className="space-y-0.5 max-md:-mt-10">
                 <h1 className="text-2xl font-bold text-gray-900">Create a new oracle</h1>

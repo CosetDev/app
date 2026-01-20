@@ -5,7 +5,7 @@ import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
 import { useEffect, useMemo } from "react";
 
 // Networks
-import { mantle, mantleSepoliaTestnet } from "viem/chains";
+import { cronos, cronosTestnet, mantle, mantleSepoliaTestnet } from "viem/chains";
 
 let connectedWallet: string | undefined;
 
@@ -79,7 +79,7 @@ export default function WalletProvider({ children }: Readonly<{ children: React.
                     noPromptOnMfaRequired: false,
                 },
                 defaultChain: mantleSepoliaTestnet,
-                supportedChains: [mantle, mantleSepoliaTestnet],
+                supportedChains: [mantle, mantleSepoliaTestnet, cronos, cronosTestnet],
             }}
         >
             <PrivyContent>{children}</PrivyContent>

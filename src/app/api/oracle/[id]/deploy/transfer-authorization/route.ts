@@ -9,13 +9,10 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/db/connect";
 import { fromBytes } from "@/lib/utils";
 import Oracle from "@/db/models/Oracles";
+import { supportedNetworks } from "@/lib/networks";
 import { getIdTokenFromHeaders, getUser } from "@/lib/auth";
-import { availableTokens, supportedNetworks } from "@/lib/networks";
 
-export async function GET(
-    req: NextRequest,
-    { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const user = await getUser(await getIdTokenFromHeaders());
     if (!user) {
         return NextResponse.json({ message: "Connect your wallet to continue" }, { status: 401 });
@@ -32,8 +29,10 @@ export async function GET(
         return NextResponse.json({ message: "Network not found" }, { status: 404 });
     }
 
+    const network = supportedNetworks[networkId as keyof typeof supportedNetworks];
+
     const tokenParam = searchParams.get("token");
-    if (!tokenParam || !availableTokens.find(t => t.value === tokenParam)) {
+    if (!tokenParam || !network.currencies.find(t => t.label === tokenParam)) {
         return NextResponse.json({ message: "Invalid token" }, { status: 404 });
     }
 
@@ -48,7 +47,6 @@ export async function GET(
         return NextResponse.json({ message: "Endpoint not verified" }, { status: 400 });
     }
 
-    const network = supportedNetworks[networkId as keyof typeof supportedNetworks];
     const ownerWallet = new Wallet(process.env.OWNER_PRIVATE_KEY!);
 
     const currency = network.currencies.find(t => t.label === tokenParam);
@@ -65,7 +63,7 @@ export async function GET(
         const nonce = ethers.hexlify(ethers.randomBytes(32));
         const token = IERC20Extended__factory.connect(currency.address, network.provider);
         const factory = OracleFactory__factory.connect(
-            process.env.NEXT_PUBLIC_ORACLE_FACTORY_ADDRESS!,
+            network.factory,
             network.provider,
         );
 
